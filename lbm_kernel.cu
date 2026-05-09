@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <cmath> 
+#include "lbm_kernel.cuh"
 
 // D3Q27 model parameters stored in constant memory
 // D3Q27 discrete velocities 
@@ -408,7 +409,6 @@ __global__ void lbm_T_residual_kernel(const float* __restrict__ g_old,
 }
 
 // ----- Host functions to launch kernels -----
-extern "C" {
 // function to initialize GPU with parameters
 void lbm_init_gpu(int nx, int ny, int nz,
                   int* h_cx, int* h_cy, int* h_cz, int* h_opp, float* h_weights)
@@ -572,8 +572,6 @@ void lbm_free_gpu()
     if (d_T_diff_sq) cudaFree(d_T_diff_sq);
     if (d_T_mag_sq) cudaFree(d_T_mag_sq);
 }
-
-} // extern "C"
 
 
 

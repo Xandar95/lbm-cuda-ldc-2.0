@@ -1,0 +1,3 @@
+#ifndef LBM_KERNEL_CUH
+#define LBM_KERNEL_CUH
+#endif // LBM_KERNEL_CUH
