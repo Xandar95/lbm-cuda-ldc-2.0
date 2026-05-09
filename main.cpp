@@ -31,6 +31,39 @@ int main() {
     float u_lid = 0.01f; // lid velocity in lattice units
     float Re = 100.0f; // Reynolds number
     float nu = u_lid * (ny - 1) / Re; // kinematic viscosity in lattice units
+    float alpha = 0.1f; // thermal diffusivity in lattice units
+    float beta = 1.0e-4f; // thermal expansion coefficient in lattice units
+    float gravity = 1.0e-3f; // gravitational acceleration in lattice units
+    float T_ref = 0.0f; // reference temperature in lattice units
+    float kappa_wall = 1.0f; // thermal conductivity of the wall in lattice units
+    float kappa_top = 0.1f; // thermal conductivity of the top lid in lattice units
+    float q_wall = 1.0e-3f; // heat flux at the wall in lattice units
+    float q_top = 1.0e-4f; // heat flux at the top lid in lattice units
+
+    // relaxation parameters
+    float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
+    float omega_g = 1.0f / (3.0f * alpha + 0.5f); // relaxation parameter for energy equation
+
+    // set lattice positions
+    int N = nx * ny * nz; // total number of lattice points
+
+    float *x = new float[N];
+    float *y = new float[N];
+    float *z = new float[N];
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                int idx = i + j * nx + k * nx * ny; // linear index for 3D array
+
+                x[idx] = i * dx;
+                y[idx] = j * dy;
+                z[idx] = k * dz;
+            }
+        }
+    }
+    
+    
 
 
 
