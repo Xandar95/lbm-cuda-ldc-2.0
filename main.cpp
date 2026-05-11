@@ -44,28 +44,48 @@ int main() {
     float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
     float omega_g = 1.0f / (3.0f * alpha + 0.5f); // relaxation parameter for energy equation
 
-    // set lattice positions
-    int N = nx * ny * nz; // total number of lattice points
+    // Lattice positions to be set in the python post-processing script
+    
+    // Set field variables and distribution functions
+    int N = nx * ny * nz; // total number of grid points
+    float* rho = new float[N]; // density
+    float* T = new float[N]; // temperature
+    float* u = new float[N]; // velocity in x direction
+    float* v = new float[N]; // velocity in y direction
+    float* w = new float[N]; // velocity in z direction
 
-    float *x = new float[N];
-    float *y = new float[N];
-    float *z = new float[N];
+    float* f = new float[N * 27]; // distribution function for momentum
+    float* g = new float[N * 27]; // distribution function for temperature
+    
+    // Lambda function to compute the 1D index from 3D indices
+    auto idx = [nx, ny](int i, int j, int k) {
+        return i + j * nx + k * nx * ny;
+    };
+    // Lambda function to compute the 1D index for distribution functions
+    auto pdf = [N](int l, int idx) {
+        return l * N + idx;
+    };
 
-    for (int i = 0; i < nx; i++) {
-        for (int j = 0; j < ny; j++) {
-            for (int k = 0; k < nz; k++) {
-                int idx = i + j * nx + k * nx * ny; // linear index for 3D array
+    // Initialize the fields and distribution functions
+    // rho = 1.0, T = 1.0, u = v = w = 0.0 everywhere except the top lid where u = u_lid
+    for (int k = 0; k < nz; k++) {
+        for (int j = 0; j < ny; j++) { 
+            for (int i = 0; i < nx; i++) {
+                rho[idx(i, j, k)] = 1.0f;
+                T[idx(i, j, k)] = 1.0f;
+                u[idx(i, j, k)] = (j == ny - 1) ? u_lid : 0.0f;
+                v[idx(i, j, k)] = 0.0f;
+                w[idx(i, j, k)] = 0.0f;
 
-                x[idx] = i * dx;
-                y[idx] = j * dy;
-                z[idx] = k * dz;
+                float u2 = u[idx(i, j, k)] * u[idx(i, j, k)] + v[idx(i, j, k)] * v[idx(i, j, k)] + w[idx(i, j, k)] * w[idx(i, j, k)]; 
+                for (int l = 0; l < 27; l++) {
+                    float cu = cx[l] * u[idx(i, j, k)] + cy[l] * v[idx(i, j, k)] + cz[l] * w[idx(i, j, k)];
+                    f[pdf(l, idx(i, j, k))] = weights[l] * rho[idx(i, j, k)] * (1.0f + 3.0f * cu + 4.5f * cu * cu - 1.5f * u2); // second order equilibrium distribution for momentum
+                    g[pdf(l, idx(i, j, k))] = weights[l] * T[idx(i, j, k)] * (1.0f + 3.0f * cu); // first order equilibrium distribution for temperature
+                }
             }
         }
     }
-    
-    
-
-
 
 
     return 0;
