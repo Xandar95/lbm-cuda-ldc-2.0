@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <fstream>
 #include "lbm_kernel.cuh"
 
 int main() {
@@ -87,6 +88,70 @@ int main() {
         }
     }
 
+    // Initialize the GPU
+    printf("Initializing GPU...\n");
+    lbm_init_gpu(nx, ny, nz, cx, cy, cz, opp, weights);
 
+    // Copy initial distribution functions to GPU
+    printf("Copying initial data to GPU...\n");
+    lbm_copy_host_to_device(f, g, nx, ny, nz);
+
+    // Begin time-stepping loop
+    printf("Starting time-stepping loop on GPU...\n");
+
+    for (int t = 0; t < nsteps; t++) {
+        lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, q_top, kappa_wall, kappa_top);
+
+        // Check residual and progress output every 1000 steps
+        if (t % 1000 == 0) {
+            float residual_u = lbm_compute_u_residual_gpu(nx, ny, nz);
+            float residual_T = lbm_compute_T_residual_gpu(nx, ny, nz); 
+            printf("Time step: %d, u residual: %e, T residual: %e\n", t, residual_u, residual_T);
+
+            if (residual_u < 1.0e-4f && residual_T < 1.0e-5f) {
+                printf("Simulation converged at time step %d\n", t);
+                break;
+            }
+        }
+    }
+
+    // Copy final results back to the host
+    printf("Copying results back to the host...\n");
+    lbm_copy_device_to_host(f, g, nx, ny, nz);
+
+    // Free device memory 
+    lbm_free_gpu();
+
+    // Output velocity, temperature and pressure fields
+    std::ofstream output_file;
+    output_file.open("lbm_results.csv");
+    // Compute macroscopic variables from distribution functions and write to file
+    for (int k = 0; k < nz; k++) {
+        for (int j = 0; j < ny; j++) {
+            for (int i = 0; i < nx; i++) {
+                float rho_local = 0.0f;
+                float T_local = 0.0f;
+                float u_local = 0.0f;
+                float v_local = 0.0f;
+                float w_local = 0.0f;
+
+                for (int l = 0; l < 27; l++) {
+                    rho_local += f[pdf(l, idx(i, j, k))];
+                    T_local += g[pdf(l, idx(i, j, k))];
+                    u_local += f[pdf(l, idx(i, j, k))] * cx[l];
+                    v_local += f[pdf(l, idx(i, j, k))] * cy[l];
+                    w_local += f[pdf(l, idx(i, j, k))] * cz[l];
+                }
+                u_local /= rho_local;
+                v_local /= rho_local;
+                w_local /= rho_local;
+                float p_local = cs * cs * rho_local; // pressure from equation of state
+
+                output_file << u_local << "," << v_local << "," << w_local << "," << T_local << "," << p_local << "\n";
+            }
+        }
+    }
+    output_file.close();
+    
     return 0;
 }
