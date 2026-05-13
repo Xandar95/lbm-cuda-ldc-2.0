@@ -480,9 +480,8 @@ void lbm_run_step_gpu(int nx, int ny, int nz, float omega_f, float omega_g, floa
 float lbm_compute_u_residual_gpu(int nx, int ny, int nz)  
 {   
     // reset residual accumulators
-    float zero = 0.0; // initialize to zero for atomic add
-    cudaMemcpy(d_u_diff_sq, &zero, sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_u_mag_sq, &zero, sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemset(d_u_diff_sq, 0, sizeof(float));
+    cudaMemset(d_u_mag_sq, 0, sizeof(float));
 
     // define block and grid sizes
     // -------- 3D grid and block configuration --------
@@ -518,9 +517,8 @@ float lbm_compute_u_residual_gpu(int nx, int ny, int nz)
 float lbm_compute_T_residual_gpu(int nx, int ny, int nz)  
 {   
     // reset residual accumulators
-    float zero = 0.0; // initialize to zero for atomic add
-    cudaMemcpy(d_T_diff_sq, &zero, sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_T_mag_sq, &zero, sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemset(d_T_diff_sq, 0, sizeof(float));
+    cudaMemset(d_T_mag_sq, 0, sizeof(float));
 
     // define block and grid sizes
     // -------- 3D grid and block configuration --------
