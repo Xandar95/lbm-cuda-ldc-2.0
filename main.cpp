@@ -102,10 +102,12 @@ int main() {
     for (int t = 0; t < nsteps; t++) {
         lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, q_top, kappa_wall, kappa_top);
 
+        float residual_u = 0.0f;
+        float residual_T = 0.0f;
         // Check residual and progress output every 1000 steps
         if (t % 1000 == 0) {
-            float residual_u = lbm_compute_u_residual_gpu(nx, ny, nz);
-            float residual_T = lbm_compute_T_residual_gpu(nx, ny, nz); 
+            residual_u = lbm_compute_u_residual_gpu(nx, ny, nz);
+            residual_T = lbm_compute_T_residual_gpu(nx, ny, nz); 
             printf("Time step: %d, u residual: %e, T residual: %e\n", t, residual_u, residual_T);
 
             if (residual_u < 1.0e-4f && residual_T < 1.0e-5f) {
