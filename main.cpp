@@ -38,8 +38,8 @@ int main() {
     float T_ref = 0.0f; // reference temperature in lattice units
     float kappa_wall = 1.0f; // thermal conductivity of the wall in lattice units
     float kappa_top = 0.1f; // thermal conductivity of the top lid in lattice units
-    float q_wall = 1.0e-3f; // heat flux at the wall in lattice units
-    float q_top = 1.0e-4f; // heat flux at the top lid in lattice units
+    float q_wall = 1.0e-4f; // heat flux at the wall in lattice units
+    float q_top = -1.0e-5f; // heat flux at the top lid in lattice units
 
     // relaxation parameters
     float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
@@ -152,6 +152,6 @@ int main() {
         }
     }
     output_file.close();
-    
+
     return 0;
 }
