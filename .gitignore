@@ -3,3 +3,4 @@
 *.dat
 *.o
 lbm_sim
+*.csv
