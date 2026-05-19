@@ -44,11 +44,12 @@ int main() {
     // relaxation parameters
     float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
     float omega_g = 1.0f / (3.0f * alpha + 0.5f); // relaxation parameter for energy equation
-
-    // Lattice positions to be set in the python post-processing script
     
     // Set field variables and distribution functions
     int N = nx * ny * nz; // total number of grid points
+    float* x = new float[N]; // x coordinates
+    float* y = new float[N]; // y coordinates
+    float* z = new float[N]; // z coordinates
     float* rho = new float[N]; // density
     float* T = new float[N]; // temperature
     float* u = new float[N]; // velocity in x direction
@@ -72,6 +73,12 @@ int main() {
     for (int k = 0; k < nz; k++) {
         for (int j = 0; j < ny; j++) { 
             for (int i = 0; i < nx; i++) {
+                // set coordinates
+                x[idx(i, j, k)] = i * dx;
+                y[idx(i, j, k)] = j * dy;
+                z[idx(i, j, k)] = k * dz;
+
+                // set initial conditions
                 rho[idx(i, j, k)] = 1.0f;
                 T[idx(i, j, k)] = 1.0f;
                 u[idx(i, j, k)] = (j == ny - 1) ? u_lid : 0.0f;
@@ -149,11 +156,16 @@ int main() {
                 w_local /= rho_local;
                 float p_local = cs * cs * rho_local; // pressure from equation of state
 
-                output_file << u_local << "," << v_local << "," << w_local << "," << T_local << "," << p_local << "\n";
+                output_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local << "," << v_local << "," << w_local << "," << T_local << "," << p_local << "\n";
             }
         }
     }
     output_file.close();
+
+    // Free host memory
+    delete[] x;
+    delete[] y;
+    delete[] z;
 
     return 0;
 }
