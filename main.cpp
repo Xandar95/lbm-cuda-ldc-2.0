@@ -156,7 +156,7 @@ int main() {
                 w_local /= rho_local;
                 float p_local = cs * cs * rho_local; // pressure from equation of state
 
-                output_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local << "," << v_local << "," << w_local << "," << T_local << "," << p_local << "\n";
+                output_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local / u_lid << "," << v_local / u_lid << "," << w_local / u_lid << "," << T_local << "," << p_local << "\n"; // output coordinates, normalized velocity, temperature, and pressure
             }
         }
     }
