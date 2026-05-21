@@ -46,28 +46,50 @@ class Plotter:
         self.T_3d = T_3d
         self.p_3d = p_3d
 
-    # plot XY plane velocity contours at a given z-slice
-    def plot_velocity_contours(self, z_slice):
+    # plot velocity contours of {'XY', 'XZ', 'YZ'} planes at a given slice
+    def plot_velocity_contours(self, plane, slice):
         fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
 
-        c0 = axes[0].contourf(
-            self.x_3d[:, :, z_slice], self.y_3d[:, :, z_slice], self.u_3d[:, :, z_slice], levels=50, cmap='jet'
-        )
-        fig.colorbar(c0, ax=axes[0], label='Velocity u')
+        if plane == 'XY':
+            c0 = axes[0].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.u_3d[:, :, slice], levels=50, cmap='jet')
+            fig.colorbar(c0, ax=axes[0], label='Velocity u')
 
-        c1 = axes[1].contourf(
-            self.x_3d[:, :, z_slice], self.y_3d[:, :, z_slice], self.v_3d[:, :, z_slice], levels=50, cmap='jet'
-        )
-        fig.colorbar(c1, ax=axes[1], label='Velocity v')
+            c1 = axes[1].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.v_3d[:, :, slice], levels=50, cmap='jet')
+            fig.colorbar(c1, ax=axes[1], label='Velocity v')
 
-        c2 = axes[2].contourf(
-            self.x_3d[:, :, z_slice], self.y_3d[:, :, z_slice], self.w_3d[:, :, z_slice], levels=50, cmap='jet'
-        )
-        fig.colorbar(c2, ax=axes[2], label='Velocity w')
+            c2 = axes[2].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.w_3d[:, :, slice], levels=50, cmap='jet')
+            fig.colorbar(c2, ax=axes[2], label='Velocity w')
 
-        fig.suptitle(f'Velocity Contours at z-slice {z_slice}')
-        fig.supxlabel('x')
-        fig.supylabel('y')
+            fig.supxlabel('x')
+            fig.supylabel('y')
+        
+        elif plane == 'XZ':
+            c0 = axes[0].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.u_3d[:, slice, :], levels=50, cmap='jet')
+            fig.colorbar(c0, ax=axes[0], label='Velocity u')
+
+            c1 = axes[1].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.v_3d[:, slice, :], levels=50, cmap='jet')
+            fig.colorbar(c1, ax=axes[1], label='Velocity v')
+
+            c2 = axes[2].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.w_3d[:, slice, :], levels=50, cmap='jet')
+            fig.colorbar(c2, ax=axes[2], label='Velocity w')
+
+            fig.supxlabel('x')
+            fig.supylabel('z')
+
+        elif plane == 'YZ':
+            c0 = axes[0].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.u_3d[slice, :, :], levels=50, cmap='jet')
+            fig.colorbar(c0, ax=axes[0], label='Velocity u')
+
+            c1 = axes[1].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.v_3d[slice, :, :], levels=50, cmap='jet')
+            fig.colorbar(c1, ax=axes[1], label='Velocity v')
+
+            c2 = axes[2].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.w_3d[slice, :, :], levels=50, cmap='jet')
+            fig.colorbar(c2, ax=axes[2], label='Velocity w')
+
+            fig.supxlabel('z')
+            fig.supylabel('y')
+
+        fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice}')
         fig.tight_layout()
         plt.show()
 
@@ -82,13 +104,22 @@ class Plotter:
         plt.show()
 
     # plot XY plane temperature contours at a given z-slice
-    def plot_temperature_contours(self, z_slice):
+    def plot_temperature_contours(self, plane, slice):
         plt.figure(figsize=(6, 5))
-        plt.contourf(self.x_3d[:, :, z_slice], self.y_3d[:, :, z_slice], self.T_3d[:, :, z_slice], levels=50, cmap='inferno')
+        if plane == 'XY':
+            plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=50, cmap='inferno')
+            plt.xlabel('x')
+            plt.ylabel('y')
+        elif plane == 'XZ':
+            plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=50, cmap='inferno')
+            plt.xlabel('x')
+            plt.ylabel('z')
+        elif plane == 'YZ':
+            plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=50, cmap='inferno')
+            plt.xlabel('z')
+            plt.ylabel('y')
         plt.colorbar(label='Temperature T')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title(f'Temperature Contour at z-slice {z_slice}')
+        plt.title(f'Temperature Contour of {plane} plane at slice {slice}')
         plt.tight_layout()
         plt.show()
 
@@ -108,7 +139,9 @@ filename = 'lbm_results.csv' # replace with actual filename
 
 nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
 plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
-plotter.plot_velocity_contours(z_slice=nz//2) # plot velocity contours
+
+ # for XY plane use slice 0 to nz-1, for XZ plane use slice 0 to ny-1, for YZ plane use slice 0 to nx-1
+plotter.plot_velocity_contours(plane='YZ', slice=nx//2) # plot velocity contours
 plotter.plot_streamlines(z_slice=nz//2) # plot streamlines
-plotter.plot_temperature_contours(z_slice=nz//2) # plot temperature contours
+plotter.plot_temperature_contours(plane='YZ', slice=nx//2) # plot temperature contours
 plotter.plot_pressure_contours(z_slice=nz//2) # plot pressure contours
