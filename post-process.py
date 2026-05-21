@@ -94,12 +94,21 @@ class Plotter:
         plt.show()
 
     # plot XY plane streamlines at a given z-slice
-    def plot_streamlines(self, z_slice):
+    def plot_streamlines(self, plane, slice):
         plt.figure(figsize=(6, 5))
-        plt.streamplot(self.x_3d[:, 0, z_slice], self.y_3d[0, :, z_slice], self.u_3d[:, :, z_slice].T, self.v_3d[:, :, z_slice].T, color='k', density=1.5)
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title(f'Streamlines at z-slice {z_slice}')
+        if plane == 'XY':
+            plt.streamplot(self.x_3d[:, 0, slice], self.y_3d[0, :, slice], self.u_3d[:, :, slice].T, self.v_3d[:, :, slice].T, color='k', density=1.5)
+            plt.xlabel('x')
+            plt.ylabel('y')
+        elif plane == 'XZ':
+            plt.streamplot(self.x_3d[:, slice, 0], self.z_3d[0, slice, :], self.u_3d[:, slice, :].T, self.w_3d[:, slice, :].T, color='k', density=1.5)
+            plt.xlabel('x')
+            plt.ylabel('z')
+        elif plane == 'YZ':
+            plt.streamplot(self.z_3d[slice, 0, :], self.y_3d[slice, :, 0], self.w_3d[slice, :, :].T, self.v_3d[slice, :, :].T, color='k', density=1.5)
+            plt.xlabel('z')
+            plt.ylabel('y')
+        plt.title(f'Streamlines of {plane} plane at slice {slice}')
         plt.tight_layout()
         plt.show()
 
@@ -124,24 +133,34 @@ class Plotter:
         plt.show()
 
     # plot XY plane pressure contours at a given z-slice
-    def plot_pressure_contours(self, z_slice):
+    def plot_pressure_contours(self, plane, slice):
         plt.figure(figsize=(6, 5))
-        plt.contourf(self.x_3d[:, :, z_slice], self.y_3d[:, :, z_slice], self.p_3d[:, :, z_slice], levels=50, cmap='viridis')
+        if plane == 'XY':
+            plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=50, cmap='viridis')
+            plt.xlabel('x')
+            plt.ylabel('y')
+        elif plane == 'XZ':
+            plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=50, cmap='viridis')
+            plt.xlabel('x')
+            plt.ylabel('z')
+        elif plane == 'YZ':
+            plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=50, cmap='viridis')
+            plt.xlabel('z')
+            plt.ylabel('y')
         plt.colorbar(label='Pressure p')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title(f'Pressure Contour at z-slice {z_slice}')
+        plt.title(f'Pressure Contour of {plane} plane at slice {slice}')
         plt.tight_layout()
         plt.show()
 
 # example usage
 filename = 'lbm_results.csv' # replace with actual filename
 
+# Load simulation data and create plotter instance
 nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
 plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
 
- # for XY plane use slice 0 to nz-1, for XZ plane use slice 0 to ny-1, for YZ plane use slice 0 to nx-1
-plotter.plot_velocity_contours(plane='YZ', slice=nx//2) # plot velocity contours
-plotter.plot_streamlines(z_slice=nz//2) # plot streamlines
-plotter.plot_temperature_contours(plane='YZ', slice=nx//2) # plot temperature contours
-plotter.plot_pressure_contours(z_slice=nz//2) # plot pressure contours
+# for 'XY' plane use slice 0 to nz-1, for 'XZ' plane use slice 0 to ny-1, for 'YZ' plane use slice 0 to nx-1
+plotter.plot_velocity_contours(plane='XY', slice=nz//2) # plot velocity contours
+plotter.plot_streamlines(plane='XY', slice=nz//2) # plot streamlines
+plotter.plot_temperature_contours(plane='XY', slice=nz//2) # plot temperature contours
+plotter.plot_pressure_contours(plane='XY', slice=nz//2) # plot pressure contours
