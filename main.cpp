@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 #include "lbm_kernel.cuh"
 
 int main() {
@@ -117,6 +119,43 @@ int main() {
             residual_T = lbm_compute_T_residual_gpu(nx, ny, nz); 
             printf("Time step: %d, u residual: %e, T residual: %e\n", t, residual_u, residual_T);
 
+            // copy distribution functions back to host for output
+            lbm_copy_device_to_host(f, g, nx, ny, nz);
+
+            // write intermediate results to files every 1000 steps
+            std::ofstream intermediate_file;
+            std::ostringstream intermediate_name;
+            intermediate_name << "lbm_ldc_" << std::setw(3) << std::setfill('0') << (t / 1000) << ".csv";
+            intermediate_file.open(intermediate_name.str());
+            // Compute macroscopic variables from distribution functions and write to file
+            for (int k = 0; k < nz; k++) {
+                for (int j = 0; j < ny; j++) {
+                    for (int i = 0; i < nx; i++) {
+                        float rho_local = 0.0f;
+                        float T_local = 0.0f;
+                        float u_local = 0.0f;
+                        float v_local = 0.0f;
+                        float w_local = 0.0f;
+
+                        for (int l = 0; l < 27; l++) {
+                            rho_local += f[pdf(l, idx(i, j, k))];
+                            T_local += g[pdf(l, idx(i, j, k))];
+                            u_local += f[pdf(l, idx(i, j, k))] * cx[l];
+                            v_local += f[pdf(l, idx(i, j, k))] * cy[l];
+                            w_local += f[pdf(l, idx(i, j, k))] * cz[l];
+                        }
+                        
+                        u_local /= rho_local;
+                        v_local /= rho_local;
+                        w_local /= rho_local;
+                        float p_local = cs * cs * rho_local; // pressure from equation of state
+
+                        intermediate_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local / u_lid << "," << v_local / u_lid << "," << w_local / u_lid << "," << T_local << "," << p_local << "\n"; // output coordinates, normalized velocity, temperature, and pressure
+                    }
+                }
+            }
+            intermediate_file.close();
+
             if (residual_u < 1.0e-4f && residual_T < 1.0e-5f) {
                 printf("Simulation converged at time step %d\n", t);
                 break;
@@ -124,44 +163,9 @@ int main() {
         }
     }
 
-    // Copy final results back to the host
-    printf("Copying results back to the host...\n");
-    lbm_copy_device_to_host(f, g, nx, ny, nz);
-
     // Free device memory 
     lbm_free_gpu();
-
-    // Output velocity, temperature and pressure fields
-    std::ofstream output_file;
-    output_file.open("lbm_results.csv");
-    // Compute macroscopic variables from distribution functions and write to file
-    for (int k = 0; k < nz; k++) {
-        for (int j = 0; j < ny; j++) {
-            for (int i = 0; i < nx; i++) {
-                float rho_local = 0.0f;
-                float T_local = 0.0f;
-                float u_local = 0.0f;
-                float v_local = 0.0f;
-                float w_local = 0.0f;
-
-                for (int l = 0; l < 27; l++) {
-                    rho_local += f[pdf(l, idx(i, j, k))];
-                    T_local += g[pdf(l, idx(i, j, k))];
-                    u_local += f[pdf(l, idx(i, j, k))] * cx[l];
-                    v_local += f[pdf(l, idx(i, j, k))] * cy[l];
-                    w_local += f[pdf(l, idx(i, j, k))] * cz[l];
-                }
-                u_local /= rho_local;
-                v_local /= rho_local;
-                w_local /= rho_local;
-                float p_local = cs * cs * rho_local; // pressure from equation of state
-
-                output_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local / u_lid << "," << v_local / u_lid << "," << w_local / u_lid << "," << T_local << "," << p_local << "\n"; // output coordinates, normalized velocity, temperature, and pressure
-            }
-        }
-    }
-    output_file.close();
-
+  
     // Free host memory
     delete[] x;
     delete[] y;
