@@ -5,6 +5,8 @@ author: Sandun
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import os # for file handling
+import matplotlib.animation as animation 
 
 # function to load simulation data from .csv file and rearrange the linear data into 3D arrays
 def load_simulation_data(filename):
@@ -46,71 +48,111 @@ class Plotter:
         self.T_3d = T_3d
         self.p_3d = p_3d
 
-    # plot velocity contours of {'XY', 'XZ', 'YZ'} planes at a given slice
-    def plot_velocity_contours(self, plane, slice):
+    # animate velocity contours of {'XY', 'XZ', 'YZ'} planes at a given slice
+    def animate_velocity_contours(self, files, plane, slice):
         fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+        colorbars = []
 
-        if plane == 'XY':
-            c0 = axes[0].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.u_3d[:, :, slice], levels=50, cmap='jet')
-            fig.colorbar(c0, ax=axes[0], label='Velocity u')
+        def draw_frame(frame):
+            filename = files[frame]
+            nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
 
-            c1 = axes[1].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.v_3d[:, :, slice], levels=50, cmap='jet')
-            fig.colorbar(c1, ax=axes[1], label='Velocity v')
+            # Remove colorbar axes from the previous frame before drawing new ones
+            for cbar in colorbars:
+                cbar.remove()
+            colorbars.clear()
 
-            c2 = axes[2].contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.w_3d[:, :, slice], levels=50, cmap='jet')
-            fig.colorbar(c2, ax=axes[2], label='Velocity w')
+            for ax in axes:
+                ax.clear()
+            if plane == 'XY':
+                c0 = axes[0].contourf(x_3d[:, :, slice], y_3d[:, :, slice], u_3d[:, :, slice], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
 
-            fig.supxlabel('x')
-            fig.supylabel('y')
+                c1 = axes[1].contourf(x_3d[:, :, slice], y_3d[:, :, slice], v_3d[:, :, slice], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
+
+                c2 = axes[2].contourf(x_3d[:, :, slice], y_3d[:, :, slice], w_3d[:, :, slice], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
+
+                fig.supxlabel('x')
+                fig.supylabel('y')
+
+            elif plane == 'XZ':
+                c0 = axes[0].contourf(x_3d[:, slice, :], z_3d[:, slice, :], u_3d[:, slice, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
+
+                c1 = axes[1].contourf(x_3d[:, slice, :], z_3d[:, slice, :], v_3d[:, slice, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
+
+                c2 = axes[2].contourf(x_3d[:, slice, :], z_3d[:, slice, :], w_3d[:, slice, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
+
+                fig.supxlabel('x')
+                fig.supylabel('z')
+
+            elif plane == 'YZ':
+                c0 = axes[0].contourf(z_3d[slice, :, :], y_3d[slice, :, :], u_3d[slice, :, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
+
+                c1 = axes[1].contourf(z_3d[slice, :, :], y_3d[slice, :, :], v_3d[slice, :, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
+
+                c2 = axes[2].contourf(z_3d[slice, :, :], y_3d[slice, :, :], w_3d[slice, :, :], levels=50, cmap='jet')
+                colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
+
+                fig.supxlabel('z')
+                fig.supylabel('y')
+
+            else:
+                raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
+
+            fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            fig.tight_layout()
+            return c0.collections + c1.collections + c2.collections
+
+        def init():
+            # draw first frame immediately so the animation never starts blank
+            return draw_frame(0)
+
+        anim_velocity = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+                                                blit=False, repeat=False, cache_frame_data=False)
+        return anim_velocity
+
+    # animate XY plane streamlines at a given z-slice
+    def animate_streamlines(self, files, plane, slice):
+        fig = plt.figure(figsize=(6, 5))
+
+        def draw_frame(frame):
+            filename = files[frame]
+            nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
+
+            plt.clf()
+            if plane == 'XY':
+                plt.streamplot(x_3d[:, 0, slice], y_3d[0, :, slice], u_3d[:, :, slice].T, v_3d[:, :, slice].T, color='k', density=1.5)
+                plt.xlabel('x')
+                plt.ylabel('y')
+            elif plane == 'XZ':
+                plt.streamplot(x_3d[:, slice, 0], z_3d[0, slice, :], u_3d[:, slice, :].T, w_3d[:, slice, :].T, color='k', density=1.5)
+                plt.xlabel('x')
+                plt.ylabel('z')
+            elif plane == 'YZ':
+                plt.streamplot(z_3d[slice, 0, :], y_3d[slice, :, 0], w_3d[slice, :, :].T, v_3d[slice, :, :].T, color='k', density=1.5)
+                plt.xlabel('z')
+                plt.ylabel('y')
+            else:
+                raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
+
+            plt.title(f'Streamlines of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.tight_layout()
+            return plt.gca().collections
         
-        elif plane == 'XZ':
-            c0 = axes[0].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.u_3d[:, slice, :], levels=50, cmap='jet')
-            fig.colorbar(c0, ax=axes[0], label='Velocity u')
+        def init():
+            # draw first frame immediately so the animation never starts blank
+            return draw_frame(0)
 
-            c1 = axes[1].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.v_3d[:, slice, :], levels=50, cmap='jet')
-            fig.colorbar(c1, ax=axes[1], label='Velocity v')
-
-            c2 = axes[2].contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.w_3d[:, slice, :], levels=50, cmap='jet')
-            fig.colorbar(c2, ax=axes[2], label='Velocity w')
-
-            fig.supxlabel('x')
-            fig.supylabel('z')
-
-        elif plane == 'YZ':
-            c0 = axes[0].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.u_3d[slice, :, :], levels=50, cmap='jet')
-            fig.colorbar(c0, ax=axes[0], label='Velocity u')
-
-            c1 = axes[1].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.v_3d[slice, :, :], levels=50, cmap='jet')
-            fig.colorbar(c1, ax=axes[1], label='Velocity v')
-
-            c2 = axes[2].contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.w_3d[slice, :, :], levels=50, cmap='jet')
-            fig.colorbar(c2, ax=axes[2], label='Velocity w')
-
-            fig.supxlabel('z')
-            fig.supylabel('y')
-
-        fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice}')
-        fig.tight_layout()
-        plt.show()
-
-    # plot XY plane streamlines at a given z-slice
-    def plot_streamlines(self, plane, slice):
-        plt.figure(figsize=(6, 5))
-        if plane == 'XY':
-            plt.streamplot(self.x_3d[:, 0, slice], self.y_3d[0, :, slice], self.u_3d[:, :, slice].T, self.v_3d[:, :, slice].T, color='k', density=1.5)
-            plt.xlabel('x')
-            plt.ylabel('y')
-        elif plane == 'XZ':
-            plt.streamplot(self.x_3d[:, slice, 0], self.z_3d[0, slice, :], self.u_3d[:, slice, :].T, self.w_3d[:, slice, :].T, color='k', density=1.5)
-            plt.xlabel('x')
-            plt.ylabel('z')
-        elif plane == 'YZ':
-            plt.streamplot(self.z_3d[slice, 0, :], self.y_3d[slice, :, 0], self.w_3d[slice, :, :].T, self.v_3d[slice, :, :].T, color='k', density=1.5)
-            plt.xlabel('z')
-            plt.ylabel('y')
-        plt.title(f'Streamlines of {plane} plane at slice {slice}')
-        plt.tight_layout()
-        plt.show()
+        anim_streamlines = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+                                                    blit=False, repeat=False, cache_frame_data=False)
+        return anim_streamlines
 
     # plot XY plane temperature contours at a given z-slice
     def plot_temperature_contours(self, plane, slice):
@@ -127,6 +169,8 @@ class Plotter:
             plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=50, cmap='inferno')
             plt.xlabel('z')
             plt.ylabel('y')
+        else:
+            raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
         plt.colorbar(label='Temperature T')
         plt.title(f'Temperature Contour of {plane} plane at slice {slice}')
         plt.tight_layout()
@@ -147,20 +191,35 @@ class Plotter:
             plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=50, cmap='viridis')
             plt.xlabel('z')
             plt.ylabel('y')
+        else:
+            raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
         plt.colorbar(label='Pressure p')
         plt.title(f'Pressure Contour of {plane} plane at slice {slice}')
         plt.tight_layout()
         plt.show()
 
-# example usage
-filename = 'lbm_results.csv' # replace with actual filename
+# main function to load data and create visualizations
+def main():
+    files = sorted([f for f in os.listdir() if f.endswith('.csv')])
+    if not files:
+        raise FileNotFoundError('No .csv files found in the current directory.')
 
-# Load simulation data and create plotter instance
-nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
-plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
+    # load the first file to get grid dimensions and create plotter instance
+    nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(files[0])
+    plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
+    #anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
+    anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
+    plt.show()
 
-# for 'XY' plane use slice 0 to nz-1, for 'XZ' plane use slice 0 to ny-1, for 'YZ' plane use slice 0 to nx-1
-plotter.plot_velocity_contours(plane='XY', slice=nz//2) # plot velocity contours
-plotter.plot_streamlines(plane='XY', slice=nz//2) # plot streamlines
-plotter.plot_temperature_contours(plane='XY', slice=nz//2) # plot temperature contours
-plotter.plot_pressure_contours(plane='XY', slice=nz//2) # plot pressure contours
+if __name__ == "__main__":
+    main()
+
+        
+    
+
+
+
+
+
+
+
