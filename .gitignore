@@ -4,3 +4,4 @@
 *.o
 lbm_sim
 *.csv
+*.f90
