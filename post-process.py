@@ -154,49 +154,89 @@ class Plotter:
                                                     blit=False, repeat=False, cache_frame_data=False)
         return anim_streamlines
 
-    # plot XY plane temperature contours at a given z-slice
-    def plot_temperature_contours(self, plane, slice):
-        plt.figure(figsize=(6, 5))
-        if plane == 'XY':
-            plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=50, cmap='inferno')
-            plt.xlabel('x')
-            plt.ylabel('y')
-        elif plane == 'XZ':
-            plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=50, cmap='inferno')
-            plt.xlabel('x')
-            plt.ylabel('z')
-        elif plane == 'YZ':
-            plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=50, cmap='inferno')
-            plt.xlabel('z')
-            plt.ylabel('y')
-        else:
-            raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
-        plt.colorbar(label='Temperature T')
-        plt.title(f'Temperature Contour of {plane} plane at slice {slice}')
-        plt.tight_layout()
-        plt.show()
+    # animate XY plane temperature contours at a given z-slice
+    def animate_temperature_contours(self, files, plane, slice):
+        fig = plt.figure(figsize=(6, 5))
+        colorbars = []
 
-    # plot XY plane pressure contours at a given z-slice
-    def plot_pressure_contours(self, plane, slice):
-        plt.figure(figsize=(6, 5))
-        if plane == 'XY':
-            plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=50, cmap='viridis')
-            plt.xlabel('x')
-            plt.ylabel('y')
-        elif plane == 'XZ':
-            plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=50, cmap='viridis')
-            plt.xlabel('x')
-            plt.ylabel('z')
-        elif plane == 'YZ':
-            plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=50, cmap='viridis')
-            plt.xlabel('z')
-            plt.ylabel('y')
-        else:
-            raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
-        plt.colorbar(label='Pressure p')
-        plt.title(f'Pressure Contour of {plane} plane at slice {slice}')
-        plt.tight_layout()
-        plt.show()
+        def draw_frame(frame):
+            filename = files[frame]
+            nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
+
+            # Remove colorbar axes from the previous frame before drawing new ones
+            for cbar in colorbars:
+                cbar.remove()
+            colorbars.clear()
+        
+            plt.clf()
+            if plane == 'XY':
+                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=50, cmap='inferno')
+                plt.xlabel('x')
+                plt.ylabel('y')
+            elif plane == 'XZ':
+                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=50, cmap='inferno')
+                plt.xlabel('x')
+                plt.ylabel('z')
+            elif plane == 'YZ':
+                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=50, cmap='inferno')
+                plt.xlabel('z')
+                plt.ylabel('y')
+            else:
+                raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
+            colorbars.append(plt.colorbar(label='Temperature T'))
+            plt.title(f'Temperature Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.tight_layout()
+            return plt.gca().collections
+
+        def init():
+            # draw first frame immediately so the animation never starts blank
+            return draw_frame(0)
+            
+        anim_temperature = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+                                                    blit=False, repeat=False, cache_frame_data=False)
+        return anim_temperature
+
+    # animate XY plane pressure contours at a given z-slice
+    def animate_pressure_contours(self, files, plane, slice):
+        fig = plt.figure(figsize=(6, 5))
+        colorbars = []
+
+        def draw_frame(frame):
+            filename = files[frame]
+            nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
+
+            # Remove colorbar axes from the previous frame before drawing new ones
+            for cbar in colorbars:
+                cbar.remove()
+            colorbars.clear()
+        
+            plt.clf()
+            if plane == 'XY':
+                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=50, cmap='viridis')
+                plt.xlabel('x')
+                plt.ylabel('y')
+            elif plane == 'XZ':
+                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=50, cmap='viridis')
+                plt.xlabel('x')
+                plt.ylabel('z')
+            elif plane == 'YZ':
+                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=50, cmap='viridis')
+                plt.xlabel('z')
+                plt.ylabel('y')
+            else:
+                raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
+            colorbars.append(plt.colorbar(label='Pressure p'))
+            plt.title(f'Pressure Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.tight_layout()
+            return plt.gca().collections
+        
+        def init():
+            # draw first frame immediately so the animation never starts blank
+            return draw_frame(0)
+        
+        anim_pressure = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+                                                    blit=False, repeat=False, cache_frame_data=False)
+        return anim_pressure
 
 # main function to load data and create visualizations
 def main():
@@ -207,8 +247,10 @@ def main():
     # load the first file to get grid dimensions and create plotter instance
     nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(files[0])
     plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
-    #anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
-    anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
+    anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
+    #anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
+    #anim_temperature = plotter.animate_temperature_contours(files, plane='XY', slice=nz//2)
+    #anim_pressure = plotter.animate_pressure_contours(files, plane='XY', slice=nz//2)
     plt.show()
 
 if __name__ == "__main__":
