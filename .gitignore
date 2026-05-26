@@ -1,6 +1,5 @@
 # exclude data files and executables
-*.out
-*.dat
+venv
 *.o
 lbm_sim
 *.csv
