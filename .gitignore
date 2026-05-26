@@ -3,4 +3,5 @@ venv
 *.o
 lbm_sim
 *.csv
+*.vtk
 *.f90
