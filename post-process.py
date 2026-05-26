@@ -110,11 +110,7 @@ class Plotter:
             fig.tight_layout()
             return c0.collections + c1.collections + c2.collections
 
-        def init():
-            # draw first frame immediately so the animation never starts blank
-            return draw_frame(0)
-
-        anim_velocity = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+        anim_velocity = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                 blit=False, repeat=False, cache_frame_data=False)
         return anim_velocity
 
@@ -145,12 +141,8 @@ class Plotter:
             plt.title(f'Streamlines of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca().collections
-        
-        def init():
-            # draw first frame immediately so the animation never starts blank
-            return draw_frame(0)
 
-        anim_streamlines = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+        anim_streamlines = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                     blit=False, repeat=False, cache_frame_data=False)
         return anim_streamlines
 
@@ -187,12 +179,8 @@ class Plotter:
             plt.title(f'Temperature Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca().collections
-
-        def init():
-            # draw first frame immediately so the animation never starts blank
-            return draw_frame(0)
             
-        anim_temperature = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+        anim_temperature = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                     blit=False, repeat=False, cache_frame_data=False)
         return anim_temperature
 
@@ -230,11 +218,7 @@ class Plotter:
             plt.tight_layout()
             return plt.gca().collections
         
-        def init():
-            # draw first frame immediately so the animation never starts blank
-            return draw_frame(0)
-        
-        anim_pressure = animation.FuncAnimation(fig, draw_frame, frames=range(1, len(files)), init_func=init, interval=50,
+        anim_pressure = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                     blit=False, repeat=False, cache_frame_data=False)
         return anim_pressure
 
@@ -247,8 +231,8 @@ def main():
     # load the first file to get grid dimensions and create plotter instance
     nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(files[0])
     plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
-    anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
-    #anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
+    #anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
+    anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
     #anim_temperature = plotter.animate_temperature_contours(files, plane='XY', slice=nz//2)
     #anim_pressure = plotter.animate_pressure_contours(files, plane='XY', slice=nz//2)
     plt.show()
