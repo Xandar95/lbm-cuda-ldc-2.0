@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <filesystem>
 #include "lbm_kernel.cuh"
 
 int main() {
@@ -108,6 +109,12 @@ int main() {
     // Begin time-stepping loop
     printf("Starting time-stepping loop on GPU...\n");
 
+    // Create output directory if it doesn't exist
+    std::string output_dir = "sim_output";
+    if (!std::filesystem::exists(output_dir)) {
+        std::filesystem::create_directory(output_dir);
+    }
+
     for (int t = 0; t < nsteps; t++) {
         lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, q_top, kappa_wall, kappa_top);
 
@@ -122,10 +129,10 @@ int main() {
             // copy distribution functions back to host for output
             lbm_copy_device_to_host(f, g, nx, ny, nz);
 
-            // write intermediate results to files every 1000 steps
+            // write intermediate results files to a folder every 1000 steps
             std::ofstream intermediate_file;
             std::ostringstream intermediate_name;
-            intermediate_name << "lbm_ldc_" << std::setw(3) << std::setfill('0') << (t / 1000) << ".csv";
+            intermediate_name << output_dir << "/lbm_ldc_" << std::setw(3) << std::setfill('0') << (t / 1000) << ".csv";
             intermediate_file.open(intermediate_name.str());
             // Compute macroscopic variables from distribution functions and write to file
             for (int k = 0; k < nz; k++) {
