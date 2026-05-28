@@ -32,8 +32,8 @@ int main() {
     int opp[27] = {0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17, 20, 19, 22, 21, 24, 23, 26, 25}; // opposite lattice directions
 
     // physical parameters 
-    float u_lid = 0.01f; // lid velocity in lattice units
-    float Re = 100.0f; // Reynolds number
+    float u_lid = 0.05f; // lid velocity in lattice units
+    float Re = 400.0f; // Reynolds number
     float nu = u_lid * (ny - 1) / Re; // kinematic viscosity in lattice units
     float alpha = 0.1f; // thermal diffusivity in lattice units
     float beta = 1.0e-4f; // thermal expansion coefficient in lattice units
@@ -165,7 +165,7 @@ int main() {
             }
             intermediate_file.close();
 
-            if (residual_u < 1.0e-4f && residual_T < 1.0e-5f) {
+            if (residual_u < 1.0e-5f && residual_T < 1.0e-5f) {
                 printf("Simulation converged at time step %d\n", t);
                 break;
             }
