@@ -45,22 +45,27 @@ def save_to_vti(filename, nx, ny, nz, x, y, z, u, v, w, T, p):
     grid['T'] = T.flatten(order='F')
     grid['p'] = p.flatten(order='F')
 
-    grid['Magnitude'] = np.sqrt(u.flatten(order='F')**2 + v.flatten(order='F')**2 + w.flatten(order='F')**2)
+    grid['Velocity'] = np.column_stack((u.flatten(order='F'), v.flatten(order='F'), w.flatten(order='F'))) # velocity vector
+    grid['Magnitude'] = np.sqrt(u.flatten(order='F')**2 + v.flatten(order='F')**2 + w.flatten(order='F')**2) # velocity magnitude
 
-    # save the grid to a .vti file
-    grid.save(filename.replace('.csv', '.vti'))
+    # save the grid
+    grid.save(filename)
 
 def main():
     output_dir = 'vti_output'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    os.chdir(output_dir)
+    os.makedirs(output_dir, exist_ok=True) # create output directory if it doesn't exist
 
-    files = sorted([f for f in os.listdir('..') if f.endswith('.csv')])
+    # get list of .csv files in the sim_output directory
+    input_dir = 'sim_output'
+    files = sorted([os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith('.csv')])
+    if not files:
+        raise FileNotFoundError(f"No .csv files found in {input_dir}")
+
     for filename in files:
         print(f"Processing {filename}...")
-        nx, ny, nz, x, y, z, u, v, w, T, p = load_simulation_data(os.path.join('..', filename))
-        save_to_vti(filename, nx, ny, nz, x, y, z, u, v, w, T, p)
+        nx, ny, nz, x, y, z, u, v, w, T, p = load_simulation_data(filename)
+        output_filename = os.path.join(output_dir, os.path.basename(filename).replace('.csv', '.vti'))
+        save_to_vti(output_filename, nx, ny, nz, x, y, z, u, v, w, T, p)
     print("Conversion complete. .vti files saved in 'vti_output' directory.")
 
 if __name__ == "__main__":

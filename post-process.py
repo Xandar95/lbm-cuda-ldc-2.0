@@ -65,39 +65,39 @@ class Plotter:
             for ax in axes:
                 ax.clear()
             if plane == 'XY':
-                c0 = axes[0].contourf(x_3d[:, :, slice], y_3d[:, :, slice], u_3d[:, :, slice], levels=50, cmap='jet')
+                c0 = axes[0].contourf(x_3d[:, :, slice], y_3d[:, :, slice], u_3d[:, :, slice], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
 
-                c1 = axes[1].contourf(x_3d[:, :, slice], y_3d[:, :, slice], v_3d[:, :, slice], levels=50, cmap='jet')
+                c1 = axes[1].contourf(x_3d[:, :, slice], y_3d[:, :, slice], v_3d[:, :, slice], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
 
-                c2 = axes[2].contourf(x_3d[:, :, slice], y_3d[:, :, slice], w_3d[:, :, slice], levels=50, cmap='jet')
+                c2 = axes[2].contourf(x_3d[:, :, slice], y_3d[:, :, slice], w_3d[:, :, slice], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
 
                 fig.supxlabel('x')
                 fig.supylabel('y')
 
             elif plane == 'XZ':
-                c0 = axes[0].contourf(x_3d[:, slice, :], z_3d[:, slice, :], u_3d[:, slice, :], levels=50, cmap='jet')
+                c0 = axes[0].contourf(x_3d[:, slice, :], z_3d[:, slice, :], u_3d[:, slice, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
 
-                c1 = axes[1].contourf(x_3d[:, slice, :], z_3d[:, slice, :], v_3d[:, slice, :], levels=50, cmap='jet')
+                c1 = axes[1].contourf(x_3d[:, slice, :], z_3d[:, slice, :], v_3d[:, slice, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
 
-                c2 = axes[2].contourf(x_3d[:, slice, :], z_3d[:, slice, :], w_3d[:, slice, :], levels=50, cmap='jet')
+                c2 = axes[2].contourf(x_3d[:, slice, :], z_3d[:, slice, :], w_3d[:, slice, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
 
                 fig.supxlabel('x')
                 fig.supylabel('z')
 
             elif plane == 'YZ':
-                c0 = axes[0].contourf(z_3d[slice, :, :], y_3d[slice, :, :], u_3d[slice, :, :], levels=50, cmap='jet')
+                c0 = axes[0].contourf(z_3d[slice, :, :], y_3d[slice, :, :], u_3d[slice, :, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c0, ax=axes[0], label='Velocity u'))
 
-                c1 = axes[1].contourf(z_3d[slice, :, :], y_3d[slice, :, :], v_3d[slice, :, :], levels=50, cmap='jet')
+                c1 = axes[1].contourf(z_3d[slice, :, :], y_3d[slice, :, :], v_3d[slice, :, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c1, ax=axes[1], label='Velocity v'))
 
-                c2 = axes[2].contourf(z_3d[slice, :, :], y_3d[slice, :, :], w_3d[slice, :, :], levels=50, cmap='jet')
+                c2 = axes[2].contourf(z_3d[slice, :, :], y_3d[slice, :, :], w_3d[slice, :, :], levels=24, cmap='jet')
                 colorbars.append(fig.colorbar(c2, ax=axes[2], label='Velocity w'))
 
                 fig.supxlabel('z')
@@ -108,7 +108,7 @@ class Plotter:
 
             fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
             fig.tight_layout()
-            return c0.collections + c1.collections + c2.collections
+            return [c0, c1, c2]
 
         anim_velocity = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                 blit=False, repeat=False, cache_frame_data=False)
@@ -140,7 +140,7 @@ class Plotter:
 
             plt.title(f'Streamlines of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
-            return plt.gca().collections
+            return plt.gca()
 
         anim_streamlines = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                     blit=False, repeat=False, cache_frame_data=False)
@@ -162,15 +162,15 @@ class Plotter:
         
             plt.clf()
             if plane == 'XY':
-                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=50, cmap='inferno')
+                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=24, cmap='inferno')
                 plt.xlabel('x')
                 plt.ylabel('y')
             elif plane == 'XZ':
-                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=50, cmap='inferno')
+                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=24, cmap='inferno')
                 plt.xlabel('x')
                 plt.ylabel('z')
             elif plane == 'YZ':
-                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=50, cmap='inferno')
+                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=24, cmap='inferno')
                 plt.xlabel('z')
                 plt.ylabel('y')
             else:
@@ -200,15 +200,15 @@ class Plotter:
         
             plt.clf()
             if plane == 'XY':
-                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=50, cmap='viridis')
+                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=24, cmap='viridis')
                 plt.xlabel('x')
                 plt.ylabel('y')
             elif plane == 'XZ':
-                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=50, cmap='viridis')
+                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=24, cmap='viridis')
                 plt.xlabel('x')
                 plt.ylabel('z')
             elif plane == 'YZ':
-                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=50, cmap='viridis')
+                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=24, cmap='viridis')
                 plt.xlabel('z')
                 plt.ylabel('y')
             else:
@@ -216,7 +216,7 @@ class Plotter:
             colorbars.append(plt.colorbar(label='Pressure p'))
             plt.title(f'Pressure Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
-            return plt.gca().collections
+            return plt.gca()
         
         anim_pressure = animation.FuncAnimation(fig, draw_frame, frames=range(len(files)), interval=50,
                                                     blit=False, repeat=False, cache_frame_data=False)
@@ -224,16 +224,20 @@ class Plotter:
 
 # main function to load data and create visualizations
 def main():
-    files = sorted([f for f in os.listdir() if f.endswith('.csv')])
+    # get list of .csv files in the sim_output directory
+    output_dir = 'sim_output'
+    files = sorted([os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.csv')])
     if not files:
-        raise FileNotFoundError('No .csv files found in the current directory.')
+        raise FileNotFoundError('No .csv files found in the sim_output directory.')
 
     # load the first file to get grid dimensions and create plotter instance
     nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(files[0])
     plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
+
+    # create animations for velocity contours, streamlines, temperature contours, and pressure contours
     #anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
-    anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
-    #anim_temperature = plotter.animate_temperature_contours(files, plane='XY', slice=nz//2)
+    #anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
+    anim_temperature = plotter.animate_temperature_contours(files, plane='XY', slice=nz//2)
     #anim_pressure = plotter.animate_pressure_contours(files, plane='XY', slice=nz//2)
     plt.show()
 

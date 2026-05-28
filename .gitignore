@@ -1,4 +1,5 @@
 # exclude data files and executables
+__pycache__
 venv
 *.o
 lbm_sim
