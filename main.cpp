@@ -132,8 +132,10 @@ int main() {
             // write intermediate results files to a folder every 1000 steps
             std::ofstream intermediate_file;
             std::ostringstream intermediate_name;
-            intermediate_name << output_dir << "/lbm_ldc_" << std::setw(3) << std::setfill('0') << (t / 1000) << ".csv";
+            intermediate_name << output_dir << "/lbm_ldc_" << std::setw(6) << std::setfill('0') << (t / 1000) << ".csv";
             intermediate_file.open(intermediate_name.str());
+            intermediate_file << std::scientific << std::setprecision(7); // set scientific notation and precision for output
+
             // Compute macroscopic variables from distribution functions and write to file
             for (int k = 0; k < nz; k++) {
                 for (int j = 0; j < ny; j++) {
