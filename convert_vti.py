@@ -46,7 +46,6 @@ def save_to_vti(filename, nx, ny, nz, x, y, z, u, v, w, T, p):
     grid['p'] = p.flatten(order='F')
 
     grid['Velocity'] = np.column_stack((u.flatten(order='F'), v.flatten(order='F'), w.flatten(order='F'))) # velocity vector
-    grid['Magnitude'] = np.sqrt(u.flatten(order='F')**2 + v.flatten(order='F')**2 + w.flatten(order='F')**2) # velocity magnitude
 
     # save the grid
     grid.save(filename)
