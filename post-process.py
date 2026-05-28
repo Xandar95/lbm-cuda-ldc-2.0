@@ -162,15 +162,15 @@ class Plotter:
         
             plt.clf()
             if plane == 'XY':
-                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.T_3d[:, :, slice], levels=24, cmap='inferno')
+                plt.contourf(x_3d[:, :, slice], y_3d[:, :, slice], T_3d[:, :, slice], levels=24, cmap='inferno')
                 plt.xlabel('x')
                 plt.ylabel('y')
             elif plane == 'XZ':
-                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.T_3d[:, slice, :], levels=24, cmap='inferno')
+                plt.contourf(x_3d[:, slice, :], z_3d[:, slice, :], T_3d[:, slice, :], levels=24, cmap='inferno')
                 plt.xlabel('x')
                 plt.ylabel('z')
             elif plane == 'YZ':
-                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.T_3d[slice, :, :], levels=24, cmap='inferno')
+                plt.contourf(z_3d[slice, :, :], y_3d[slice, :, :], T_3d[slice, :, :], levels=24, cmap='inferno')
                 plt.xlabel('z')
                 plt.ylabel('y')
             else:
@@ -200,15 +200,15 @@ class Plotter:
         
             plt.clf()
             if plane == 'XY':
-                plt.contourf(self.x_3d[:, :, slice], self.y_3d[:, :, slice], self.p_3d[:, :, slice], levels=24, cmap='viridis')
+                plt.contourf(x_3d[:, :, slice], y_3d[:, :, slice], p_3d[:, :, slice], levels=24, cmap='viridis')
                 plt.xlabel('x')
                 plt.ylabel('y')
             elif plane == 'XZ':
-                plt.contourf(self.x_3d[:, slice, :], self.z_3d[:, slice, :], self.p_3d[:, slice, :], levels=24, cmap='viridis')
+                plt.contourf(x_3d[:, slice, :], z_3d[:, slice, :], p_3d[:, slice, :], levels=24, cmap='viridis')
                 plt.xlabel('x')
                 plt.ylabel('z')
             elif plane == 'YZ':
-                plt.contourf(self.z_3d[slice, :, :], self.y_3d[slice, :, :], self.p_3d[slice, :, :], levels=24, cmap='viridis')
+                plt.contourf(z_3d[slice, :, :], y_3d[slice, :, :], p_3d[slice, :, :], levels=24, cmap='viridis')
                 plt.xlabel('z')
                 plt.ylabel('y')
             else:
