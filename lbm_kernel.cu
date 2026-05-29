@@ -112,7 +112,7 @@ __global__ void lbm_kernel_soa(const float* __restrict__ f_in,
         float feq = d_weights[l] * rho * (1.0 + 3.0 * cu + 4.5 * cu * cu - 1.5 * u2);
         float geq = d_weights[l] * T * (1.0 + 3.0 * cu); // first-order equilibrium for temperature
         // Forcing term for buoyancy (only in y-direction)
-        float Fy = -beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference
+        float Fy = -beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference (Boussinesq approximation)
         float S = d_weights[l] * (3.0 * (d_cy[l] - v) + 9.0 * cu * d_cy[l]) * Fy; // Guo's forcing term for buoyancy (Fx = 0, Fz = 0)
         // write post collision distribution
         f_out[l * N + curr_idx] = (1.0 - omega_f) * f_streamed[l] + omega_f * feq + (1.0 - 0.5 * omega_f) * S; // include forcing term
@@ -126,7 +126,7 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
                                 float* __restrict__ g,
                                 int nx, int ny, int nz,
                                 float u_lid,
-                                float q_wall, float q_top, float kappa_wall, float kappa_top) // for heat flux for temperature BC
+                                float q_wall, float T_wall, float kappa) // for heat flux for temperature BC
 {
     int N = nx * ny * nz; // total number of lattice points
     
@@ -177,7 +177,7 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         }
 
         // impose heat flux boundary condition for temperature (q = -k * dT/dx)
-        float T_west = T_west_in + q_wall / kappa_wall; // dx = 1
+        float T_west = T_west_in + q_wall / kappa; // dx = 1
 
         // No slip bounce-back for velocity and transform Neumann BC into equivalent Dirichlet BC for temperature
         for (int l = 0; l < 27; l++) {
@@ -200,7 +200,7 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         }
 
         // impose heat flux boundary condition for temperature (q = -k * dT/dx)
-        float T_east = T_east_in + q_wall / kappa_wall; // dx = 1
+        float T_east = T_east_in + q_wall / kappa; // dx = 1
 
         // No slip bounce-back for velocity and transform Neumann BC into equivalent Dirichlet BC for temperature
         for (int l = 0; l < 27; l++) {
@@ -218,6 +218,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         for (int l = 0; l < 27; l++) {
             if (d_cz[l] == 1)
                 f[l * N + idx] = f[d_opp[l] * N + idx];
+
+                float geq_south = d_weights[l] * T_wall;
+                g[l * N + idx] = geq_south; // impose Dirichlet BC for temperature at the wall (T_wall)
         }
     }
 
@@ -226,6 +229,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         for (int l = 0; l < 27; l++) {
             if (d_cz[l] == -1)
                 f[l * N + idx] = f[d_opp[l] * N + idx];
+
+                float geq_north = d_weights[l] * T_wall;
+                g[l * N + idx] = geq_north; 
         }
     }
 
@@ -234,6 +240,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         for (int l = 0; l < 27; l++) {
             if (d_cy[l] == 1)
                 f[l * N + idx] = f[d_opp[l] * N + idx];
+
+                float geq_bottom = d_weights[l] * T_wall;
+                g[l * N + idx] = geq_bottom; 
         }
     }
 
@@ -269,7 +278,7 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         }
 
         // impose heat flux boundary condition for temperature (q = -k * dT/dx)
-        float T_top = T_top_in + q_top / kappa_top; // dx = 1
+        float T_top = T_top_in - q_wall / kappa; // dx = 1
 
         // adjust incoming temperature distribution to impose Neumann BC
         for (int l = 0; l < 27; l++) {
@@ -442,7 +451,7 @@ void lbm_copy_host_to_device(float* h_f_in, float* h_g_in, int nx, int ny, int n
 
 // function to perform one LBM step
 void lbm_run_step_gpu(int nx, int ny, int nz, float omega_f, float omega_g, float u_lid, float beta, float gravity, float T_ref,
-                      float q_wall, float q_top, float kappa_wall, float kappa_top)
+                      float q_wall, float T_wall, float kappa)
 {
     // define block and grid sizes
     // -------- 3D grid and block configuration --------
@@ -464,7 +473,7 @@ void lbm_run_step_gpu(int nx, int ny, int nz, float omega_f, float omega_g, floa
     // launch bulk lbm kernel
     lbm_kernel_soa<<<grid, block>>>(d_f_in, d_f_out, d_g_in, d_g_out, nx, ny, nz, omega_f, omega_g, beta, gravity, T_ref);
     // launch boundary condition kernel
-    apply_bc_kernel<<<grid, block>>>(d_f_out, d_g_out, nx, ny, nz, u_lid, q_wall, q_top, kappa_wall, kappa_top);
+    apply_bc_kernel<<<grid, block>>>(d_f_out, d_g_out, nx, ny, nz, u_lid, q_wall, T_wall, kappa);
     // synchronize
     cudaDeviceSynchronize();
     // swap pointers for next iteration

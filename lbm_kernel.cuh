@@ -12,7 +12,7 @@ void lbm_copy_host_to_device(float* h_f_in, float* h_g_in,
                             int nx, int ny, int nz);
 
 void lbm_run_step_gpu(int nx, int ny, int nz, float omega_f, float omega_g, float u_lid, float beta, float gravity, float T_ref,
-                      float q_wall, float q_top, float kappa_wall, float kappa_top);
+                      float q_wall, float T_wall, float kappa);
 
 float lbm_compute_u_residual_gpu(int nx, int ny, int nz) ;
 

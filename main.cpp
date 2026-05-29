@@ -18,6 +18,7 @@ int main() {
     float dx = Lx / (nx - 1); float dy = Ly / (ny - 1); float dz = Lz / (nz - 1); // grid spacing
 
     // lattice parameters
+    // dt = 1.0, dx = dy = dz = 1.0 in lattice units
     float cs = 1.0f /sqrt(3.0f); // lattice speed of sound
     float weights[27] = {8.0f/27.0f, // w0
                         2.0f/27.0f, 2.0f/27.0f, 2.0f/27.0f, 2.0f/27.0f, 2.0f/27.0f, 2.0f/27.0f, // w1-w6
@@ -32,19 +33,20 @@ int main() {
     int opp[27] = {0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17, 20, 19, 22, 21, 24, 23, 26, 25}; // opposite lattice directions
 
     // physical parameters 
-    float u_lid = 0.05f; // lid velocity in lattice units
+    float u_lid = 0.05f; // lid velocity in lattice units (select such that Ma = u_lid / cs < 0.3 for incompressible flow)
     float Re = 400.0f; // Reynolds number
     float nu = u_lid * (ny - 1) / Re; // kinematic viscosity in lattice units
-    float alpha = 0.1f; // thermal diffusivity in lattice units
-    float beta = 1.0e-4f; // thermal expansion coefficient in lattice units
-    float gravity = 1.0e-3f; // gravitational acceleration in lattice units
+    float Pr = 1.0f; // Prandtl number
+    float alpha = nu / Pr; // thermal diffusivity in lattice units
+    float beta = 1.0f; // thermal expansion coefficient in lattice units
+    float Ra = 1.0e6f; // Rayleigh number
+    float gravity = Ra * alpha * nu / (beta * pow((ny - 1), 3)); // gravitational acceleration in lattice units derived from Rayleigh number
     float T_ref = 0.0f; // reference temperature in lattice units
-    float kappa_wall = 1.0f; // thermal conductivity of the wall in lattice units
-    float kappa_top = 0.1f; // thermal conductivity of the top lid in lattice units
-    float q_wall = 1.0e-4f; // heat flux at the wall in lattice units
-    float q_top = -1.0e-5f; // heat flux at the top lid in lattice units
+    float kappa =  alpha; // thermal conductivity in lattice units (assuming specific heat capacity = 1)
+    float q_wall = 1.0e-4f ; // non-dimensional heat flux at the wall 
+    float T_wall = 1.0f;
 
-    // relaxation parameters
+    // relaxation parameters (must be less than 2 for stability)
     float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
     float omega_g = 1.0f / (3.0f * alpha + 0.5f); // relaxation parameter for energy equation
     
@@ -116,7 +118,7 @@ int main() {
     }
 
     for (int t = 0; t < nsteps; t++) {
-        lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, q_top, kappa_wall, kappa_top);
+        lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, T_wall, kappa);
 
         float residual_u = 0.0f;
         float residual_T = 0.0f;
@@ -165,7 +167,7 @@ int main() {
             }
             intermediate_file.close();
 
-            if (residual_u < 1.0e-5f && residual_T < 1.0e-5f) {
+            if (residual_u < 1.0e-5f && residual_T < 1.0e-5f) {  // adjust thresholds as needed for convergence
                 printf("Simulation converged at time step %d\n", t);
                 break;
             }
