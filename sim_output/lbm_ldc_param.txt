@@ -1,9 +1,0 @@
-Reynolds number: 400
-Prandtl number: 1
-Rayleigh number: 1e+06
-Lid velocity (lattice units): 0.05
-Kinematic viscosity (lattice units): 0.015625
-Thermal diffusivity (lattice units): 0.015625
-Thermal expansion coefficient (lattice units): 1
-Gravitational acceleration (lattice units): 0.000125
-Thermal conductivity (lattice units): 0.015625

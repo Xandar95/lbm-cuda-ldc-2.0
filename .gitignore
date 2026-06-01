@@ -10,6 +10,4 @@ lbm_sim
 # exclude data files
 *.csv
 *.vti
-
-# exclude previous fortran source codes
-*.f90
+sim_output/*.txt
