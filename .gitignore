@@ -1,8 +1,15 @@
-# exclude data files and executables
+# exclude cache files and virtual environments
 __pycache__
 venv
+.vscode
+
+# exclude executables
 *.o
 lbm_sim
+
+# exclude data files
 *.csv
 *.vti
+
+# exclude previous fortran source codes
 *.f90
