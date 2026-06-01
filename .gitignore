@@ -11,3 +11,6 @@ lbm_sim
 *.csv
 *.vti
 sim_output/*.txt
+
+# exclude previous fortran source code
+*.f90
