@@ -55,7 +55,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True) # create output directory if it doesn't exist
 
     # get list of .csv files in the sim_output directory
-    input_dir = 'sim_output'
+    input_dir = '../sim_output'
     files = sorted([os.path.join(input_dir, f) for f in os.listdir(input_dir) if f.endswith('.csv')])
     if not files:
         raise FileNotFoundError(f"No .csv files found in {input_dir}")

@@ -37,6 +37,15 @@ def load_simulation_data(filename):
 
     return nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d
 
+# function to load simulation parameters from a .txt file
+def load_simulation_parameters(filename):
+    data = np.loadtxt(filename, delimiter=':', dtype=str) 
+    Re = float(data[0, 1]) # Reynolds number
+    Pr = float(data[1, 1]) # Prandtl number
+    Ra = float(data[2, 1]) # Rayleigh number
+    return Re, Pr, Ra
+
+# class to handle plotting and animation of the simulation data
 class Plotter:
     def __init__(self, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d):
         self.x_3d = x_3d
@@ -49,7 +58,7 @@ class Plotter:
         self.p_3d = p_3d
 
     # animate velocity contours of {'XY', 'XZ', 'YZ'} planes at a given slice
-    def animate_velocity_contours(self, files, plane, slice):
+    def animate_velocity_contours(self, files, param, plane, slice):
         fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
         colorbars = []
 
@@ -106,7 +115,7 @@ class Plotter:
             else:
                 raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
 
-            fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            fig.suptitle(f'Velocity Contours of {plane} plane at slice {slice} \n Re={param[0]}, Pr={param[1]}, Ra={param[2]} \n Frame: {frame+1}/{len(files)}')
             fig.tight_layout()
             return [c0, c1, c2]
 
@@ -115,7 +124,7 @@ class Plotter:
         return anim_velocity
 
     # animate XY plane streamlines at a given z-slice
-    def animate_streamlines(self, files, plane, slice):
+    def animate_streamlines(self, files, param, plane, slice):
         fig = plt.figure(figsize=(6, 5))
 
         def draw_frame(frame):
@@ -138,7 +147,7 @@ class Plotter:
             else:
                 raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
 
-            plt.title(f'Streamlines of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.title(f'Streamlines of {plane} plane at slice {slice} \n Re={param[0]}, Pr={param[1]}, Ra={param[2]} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca()
 
@@ -147,7 +156,7 @@ class Plotter:
         return anim_streamlines
 
     # animate XY plane temperature contours at a given z-slice
-    def animate_temperature_contours(self, files, plane, slice):
+    def animate_temperature_contours(self, files, param, plane, slice):
         fig = plt.figure(figsize=(6, 5))
         colorbars = []
 
@@ -176,7 +185,7 @@ class Plotter:
             else:
                 raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
             colorbars.append(plt.colorbar(label='Temperature T'))
-            plt.title(f'Temperature Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.title(f'Temperature Contour of {plane} plane at slice {slice} \n Re={param[0]}, Pr={param[1]}, Ra={param[2]} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca().collections
             
@@ -185,7 +194,7 @@ class Plotter:
         return anim_temperature
 
     # animate XY plane pressure contours at a given z-slice
-    def animate_pressure_contours(self, files, plane, slice):
+    def animate_pressure_contours(self, files, param, plane, slice):
         fig = plt.figure(figsize=(6, 5))
         colorbars = []
 
@@ -214,7 +223,7 @@ class Plotter:
             else:
                 raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
             colorbars.append(plt.colorbar(label='Pressure p'))
-            plt.title(f'Pressure Contour of {plane} plane at slice {slice} \n Frame: {frame+1}/{len(files)}')
+            plt.title(f'Pressure Contour of {plane} plane at slice {slice} \n Re={param[0]}, Pr={param[1]}, Ra={param[2]} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca()
         
@@ -225,20 +234,21 @@ class Plotter:
 # main function to load data and create visualizations
 def main():
     # get list of .csv files in the sim_output directory
-    output_dir = 'sim_output'
+    output_dir = '../sim_output'
     files = sorted([os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.csv')])
     if not files:
         raise FileNotFoundError('No .csv files found in the sim_output directory.')
 
     # load the first file to get grid dimensions and create plotter instance
     nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(files[0])
+    param = load_simulation_parameters('../sim_output/lbm_ldc_param.txt')
     plotter = Plotter(x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d)
 
     # create animations for velocity contours, streamlines, temperature contours, and pressure contours
-    #anim_velocity = plotter.animate_velocity_contours(files, plane='XY', slice=nz//2)
-    #anim_streamlines = plotter.animate_streamlines(files, plane='XY', slice=nz//2)
-    anim_temperature = plotter.animate_temperature_contours(files, plane='XY', slice=nz//2)
-    #anim_pressure = plotter.animate_pressure_contours(files, plane='XY', slice=nz//2)
+    #anim_velocity = plotter.animate_velocity_contours(files, param, plane='XY', slice=nz//2)
+    #anim_streamlines = plotter.animate_streamlines(files, param, plane='XY', slice=nz//2)
+    anim_temperature = plotter.animate_temperature_contours(files, param, plane='XY', slice=nz//2)
+    #anim_pressure = plotter.animate_pressure_contours(files, param, plane='XY', slice=nz//2)
     plt.show()
 
 if __name__ == "__main__":

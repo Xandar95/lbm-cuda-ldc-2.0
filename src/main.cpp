@@ -114,10 +114,24 @@ int main() {
     printf("Starting time-stepping loop on GPU...\n");
 
     // Create output directory if it doesn't exist
-    std::string output_dir = "sim_output";
+    std::string output_dir = "../sim_output";
     if (!std::filesystem::exists(output_dir)) {
         std::filesystem::create_directory(output_dir);
     }
+
+    // write non-dimensional parameters to a file for reference
+    std::ofstream param_file;
+    param_file.open(output_dir + "/lbm_ldc_param.txt");
+    param_file << "Reynolds number: " << Re << "\n";
+    param_file << "Prandtl number: " << Pr << "\n";
+    param_file << "Rayleigh number: " << Ra << "\n";
+    param_file << "Lid velocity (lattice units): " << u_lid << "\n";
+    param_file << "Kinematic viscosity (lattice units): " << nu << "\n";
+    param_file << "Thermal diffusivity (lattice units): " << alpha << "\n";
+    param_file << "Thermal expansion coefficient (lattice units): " << beta << "\n";
+    param_file << "Gravitational acceleration (lattice units): " << gravity << "\n";
+    param_file << "Thermal conductivity (lattice units): " << kappa << "\n";
+    param_file.close();
 
     for (int t = 0; t < nsteps; t++) {
         lbm_run_step_gpu(nx, ny, nz, omega_f, omega_g, u_lid, beta, gravity, T_ref, q_wall, T_wall, kappa);
