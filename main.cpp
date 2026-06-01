@@ -1,4 +1,5 @@
-/* GPU accelerated Heated lid driven cavity flow simulation using Lattice Boltzmann Method (LBM) */
+/* GPU accelerated Heated lid driven cavity flow simulation using Lattice Boltzmann Method (LBM) 
+Flow characterized by Reynolds, Prandtl, and Rayleigh numbers */
 
 #include <iostream>
 #include <cmath>
@@ -40,7 +41,8 @@ int main() {
     float alpha = nu / Pr; // thermal diffusivity in lattice units
     float beta = 1.0f; // thermal expansion coefficient in lattice units
     float Ra = 1.0e6f; // Rayleigh number
-    float gravity = Ra * alpha * nu / (beta * pow((ny - 1), 3)); // gravitational acceleration in lattice units derived from Rayleigh number
+    float dT_char = 1.0f; // characteristic temperature difference in lattice units
+    float gravity = Ra * alpha * nu / (beta * dT_char * pow((ny - 1), 3)); // gravitational acceleration in lattice units derived from Rayleigh number
     float T_ref = 0.0f; // reference temperature in lattice units
     float kappa =  alpha; // thermal conductivity in lattice units (assuming specific heat capacity = 1)
     float q_wall = 1.0e-4f ; // non-dimensional heat flux at the wall 
