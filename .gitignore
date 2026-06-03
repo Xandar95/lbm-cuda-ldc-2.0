@@ -3,9 +3,10 @@ __pycache__
 venv
 .vscode
 
-# exclude executables
+# exclude executables and make files
 *.o
 lbm_sim
+build
 
 # exclude data files
 *.csv
