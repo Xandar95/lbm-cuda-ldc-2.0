@@ -103,6 +103,12 @@ __global__ void lbm_kernel_soa(const float* __restrict__ f_in,
         if (rho > 1e-9) {u /= rho; v /= rho; w /= rho;} // avoid division by zero
         else {u = 0.0; v = 0.0; w = 0.0;}
 
+        // Forcing term for buoyancy (only in y-direction)
+        float Fy = -beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference (Boussinesq approximation)
+
+        // shift the velocity components to accurately recover the NSE with the force term (u = 1 / rho * sum(f_i * c_i) + 0.5 * (F * dt) / rho)
+        v += 0.5 * Fy / rho; // Fx = 0, Fz = 0, so only adjust v for buoyancy force
+
         float u2 = u * u + v * v + w * w;
 
     // Collision step
@@ -111,8 +117,6 @@ __global__ void lbm_kernel_soa(const float* __restrict__ f_in,
         float cu = d_cx[l] * u + d_cy[l] * v + d_cz[l] * w;
         float feq = d_weights[l] * rho * (1.0 + 3.0 * cu + 4.5 * cu * cu - 1.5 * u2);
         float geq = d_weights[l] * T * (1.0 + 3.0 * cu); // first-order equilibrium for temperature
-        // Forcing term for buoyancy (only in y-direction)
-        float Fy = -beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference (Boussinesq approximation)
         float S = d_weights[l] * (3.0 * (d_cy[l] - v) + 9.0 * cu * d_cy[l]) * Fy; // Guo's forcing term for buoyancy (Fx = 0, Fz = 0)
         // write post collision distribution
         f_out[l * N + curr_idx] = (1.0 - omega_f) * f_streamed[l] + omega_f * feq + (1.0 - 0.5 * omega_f) * S; // include forcing term
@@ -182,10 +186,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         // No slip bounce-back for velocity and transform Neumann BC into equivalent Dirichlet BC for temperature
         for (int l = 0; l < 27; l++) {
             if (d_cx[l] == 1) {
-                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back
+                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
-                float geq_west = d_weights[l] * T_west; // equilibrium distribution for temperature since velocity is zero at the wall
-                g[l * N + idx] = geq_west; // first order accurate equilibrium for temperature at the wall to impose Neumann BC
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_west; // anti-bounce back for temperature to impose Neumann BC
             }
         }
     }
@@ -205,10 +208,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
         // No slip bounce-back for velocity and transform Neumann BC into equivalent Dirichlet BC for temperature
         for (int l = 0; l < 27; l++) {
             if (d_cx[l] == -1) {
-                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back
+                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
-                float geq_east = d_weights[l] * T_east; // equilibrium distribution for temperature since velocity is zero at the wall
-                g[l * N + idx] = geq_east; // first order accurate equilibrium for temperature at the wall to impose Neumann BC
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_east; // anti-bounce back for temperature to impose Neumann BC
             }
         }
     }
@@ -217,10 +219,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
     if (k == 0) {
         for (int l = 0; l < 27; l++) {
             if (d_cz[l] == 1)
-                f[l * N + idx] = f[d_opp[l] * N + idx];
+                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
-                float geq_south = d_weights[l] * T_wall;
-                g[l * N + idx] = geq_south; // impose Dirichlet BC for temperature at the wall (T_wall)
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC
         }
     }
 
@@ -228,10 +229,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
     if (k == nz - 1) {
         for (int l = 0; l < 27; l++) {
             if (d_cz[l] == -1)
-                f[l * N + idx] = f[d_opp[l] * N + idx];
+                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
-                float geq_north = d_weights[l] * T_wall;
-                g[l * N + idx] = geq_north; 
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC 
         }
     }
 
@@ -239,10 +239,9 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
     if (j == 0) {
         for (int l = 0; l < 27; l++) {
             if (d_cy[l] == 1)
-                f[l * N + idx] = f[d_opp[l] * N + idx];
+                f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
-                float geq_bottom = d_weights[l] * T_wall;
-                g[l * N + idx] = geq_bottom; 
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC 
         }
     }
 
@@ -285,7 +284,7 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
             if (d_cy[l] == -1) {
                 float cu = d_cx[l] * u_lid; // since v = 0, w = 0 at the top wall
                 float geq_top = d_weights[l] * T_top * (1.0 + 3.0 * cu); // first order accurate equilibrium for temperature at the wall
-                g[l * N + idx] = geq_top; // impose Neumann BC
+                g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * geq_top; // anti-bounce back for temperature to impose Neumann BC
             }
         }
     }

@@ -41,12 +41,13 @@ int main() {
     float alpha = nu / Pr; // thermal diffusivity in lattice units
     float beta = 1.0f; // thermal expansion coefficient in lattice units
     float Ra = 1.0e6f; // Rayleigh number
-    float dT_char = 1.0f; // characteristic temperature difference in lattice units
-    float gravity = Ra * alpha * nu / (beta * dT_char * pow((ny - 1), 3)); // gravitational acceleration in lattice units derived from Rayleigh number
     float T_ref = 0.0f; // reference temperature in lattice units
     float kappa =  alpha; // thermal conductivity in lattice units (assuming specific heat capacity = 1)
     float q_wall = 1.0e-4f ; // non-dimensional heat flux at the wall 
     float T_wall = 1.0f;
+    float dT_char = (q_wall * (ny - 1)) / kappa; // characteristic temperature difference in lattice units
+    float gravity = Ra * alpha * nu / (beta * dT_char * pow((ny - 1), 3)); // gravitational acceleration in lattice units derived from Rayleigh number
+    
 
     // relaxation parameters (must be less than 2 for stability)
     float omega_f = 1.0f / (3.0f * nu + 0.5f); // relaxation parameter for momentum equation
