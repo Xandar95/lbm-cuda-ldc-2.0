@@ -18,19 +18,22 @@ Boundary conditions:
 
 - Side walls:
   - No-slip
-  - Constant heat flux $q_{wall} in West and East walls for heat addition$
-  - Constant temperature $T_{wall} in North and South walls$
+  - Constant heat flux $q_{wall}$ in West and East walls for heat addition
+  - Constant temperature $T_{wall}$ in North and South walls
 
 Buoyancy is modeled using the Boussinesq approximation.
 
 ## Preliminaries
 ### Governing Equation
+
 Lattice Boltzmann Equation with BGK-approximation:
+
 $\frac{\partial f}{\partial t} + \mathbf{c} \cdot \nabla f = \Omega(f) \Rightarrow f_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = f_i(\mathbf{x}, t) - \frac{1}{\tau_f} \left( f_i - f_i^{eq} \right)$ (for momentum)
 
 $\frac{\partial g}{\partial t} + \mathbf{c} \cdot \nabla g = \Omega(g) \Rightarrow g_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = g_i(\mathbf{x}, t) - \frac{1}{\tau_g} \left( g_i - g_i^{eq} \right)$ (for temperature)
 
 Equilibrium Distribution Function:
+
 $f_i^{eq} = w_i \rho \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} + \frac{(\mathbf{c}_i \cdot \mathbf{u})^2}{2c_s^4} - \frac{\mathbf{u}^2}{2c_s^2} \right]$ (second-order equilibrium for momentum)
 
 $g_i^{eq} = w_i T \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} \right]$ (first-order equilibrium for temperature)
@@ -111,11 +114,17 @@ The forcing term is implemented using the Guo forcing scheme.
 - NVIDIA GPU (Compute Capability ≥ 6.0)
 
 ## Build Instructions
-- Update all dependencies 'sudo apt update', 'sudo apt upgrade'.
-- Clone the repository with 'git clone '.
-- Install CMake 'sudo apt install cmake'.
-- Build using 'mkdir build', 'cd build', 'cmake ..', 'cmake --build .'.
-- Edit 'CMakeLists.txt' if using 'g++' >= 12. Also change the GPU architecture (e.g '86' for Ampere) based on your GPU.
+- Update all dependencies `sudo apt update`, `sudo apt upgrade`.
+- Clone the repository with `git clone https://github.com/Xandar95/lbm-cuda-ldc-2.0.git`.
+- Install CMake `sudo apt install cmake`.
+- Build using:
+    ```bash
+    mkdir build
+    cd build
+    cmake .. 
+    cmake --build .
+    ```
+- Edit `CMakeLists.txt` if using `g++` >= 12. Also change the GPU architecture (e.g `86` for Ampere) based on your GPU.
 - The numerical solver results will be written to a separate sim_output folder.
 
 ## Post-process Instructions
