@@ -10,7 +10,7 @@ Boundary conditions:
 
 - Top wall:
   - Constant velocity $u_{lid}$
-  - Constant heat flux $q_{wall} for heat removal$
+  - Constant heat flux $q_{wall}$ for heat removal
 
 - Bottom wall:
   - No-slip
