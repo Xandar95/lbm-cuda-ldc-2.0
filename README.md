@@ -39,23 +39,17 @@ $f_i^{eq} = w_i \rho \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} + \f
 $g_i^{eq} = w_i T \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} \right]$ (first-order equilibrium for temperature)
 
 ### Macroscopic Quantities and Boundary Conditions
-Density:
-$\rho = \sum_i f_i$
+- Density: $\rho = \sum_i f_i$
 
-Temperature: 
-$T = \sum_i g_i$
+- Temperature: $T = \sum_i g_i$
 
-Velocity:
-$\rho \mathbf{u} = \sum_i f_i \mathbf{c}_i$
+- Velocity: $\rho \mathbf{u} = \sum_i f_i \mathbf{c}_i$
 
-Stationary Wall (Bounce-back BC):
-$f_i = f_{opp}$
+- Stationary Wall (Bounce-back BC): $f_i = f_{opp}$
 
-Moving Wall (Zou/He BC):
-$f_i - f_i^{eq} = f_{opp} - f_{opp}^{eq}$
+- Moving Wall (Zou/He BC): $f_i - f_i^{eq} = f_{opp} - f_{opp}^{eq}$
 
-Constant Temperature wall (anti-bounce back BC):
-$g_i = -g_{opp} + 2 g_i^{eq}$
+- Constant Temperature wall (anti-bounce back BC): $g_i = -g_{opp} + 2 g_i^{eq}$ (heat fluxes are implemented similarly using ghost cells)
 
 ### Non-Dimensional Parameters
 
@@ -117,7 +111,7 @@ Key parameters can be modified in `src/main.cpp`:
 | `lbm_free_gpu` | Release device memory |
 
 ## Performance
--Test System:
+- Test System:
   - GPU: RTX 3050 Laptop GPU
   - CPU: Intel Core Ultra 7
   - CUDA: 13.3
