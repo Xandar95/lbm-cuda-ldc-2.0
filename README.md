@@ -61,9 +61,9 @@ $g_i = -g_{opp} + 2 g_i^{eq}$
 
 The flow is characterized by:
 
-$Re_{LB} = \frac{u_{lid} (n_y - 1)}{\nu}$
+$Re = \frac{u_{lid} (n_y - 1)}{\nu}$
 
-$Pr_{LB} = \frac{\nu}{\alpha}$
+$Pr = \frac{\nu}{\alpha}$
 
 $Ra = \frac{g \beta \Delta T_{char} (ny - 1)^3}{\nu \alpha}$
 
@@ -121,14 +121,15 @@ Test System
 - CPU: Intel Core Ultra 7
 - CUDA: 13.3
 
-Grid Size      Time/1000 Steps
-64³            XX s
-128³           XX s
-256³           XX s
+- Memory layout: Structure of Arrays (SoA)
+- Streaming: Pull
+- Precision: Single
 
-Memory layout: Structure of Arrays (SoA)
-Streaming: Pull
-Precision: Single
+|Grid Size | Time/1000 Steps |
+|----------|-----------------|
+| 64³ | XX s |
+| 128³ | XX s |
+| 256³ | XX s |
 
 ## Build Requirements
 - Linux or WSL2
@@ -158,7 +159,7 @@ Precision: Single
 - Activate virtual environment `source ./venv/bin/activate`.
 - Install the dependencies `pip install -r requirements.txt`.
 - Run the post processing script to get the plane-wise slice-wise contours `python3 post_process.py`.
-- Run the conversion script to convert the .csv data files to .vti format `python3 convert_vti.py`.
+- Run the conversion script to convert the .csv data files to .vti format `python3 convert_vti.py` to post-process in ParaView.
 
 ## Example Results
 
