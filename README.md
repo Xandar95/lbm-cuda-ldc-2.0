@@ -51,6 +51,10 @@ $g_i^{eq} = w_i T \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} \right]
 
 - Constant Temperature wall (anti-bounce back BC): $g_i = -g_{opp} + 2 g_i^{eq}$ (heat fluxes are implemented similarly using ghost cells)
 
+### D3Q27 Lattice Model
+
+![D3Q27](figures/D3Q27_unit_cell.png)
+
 ### Non-Dimensional Parameters
 
 The flow is characterized by:
