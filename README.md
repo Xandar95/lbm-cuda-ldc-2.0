@@ -23,8 +23,8 @@ Boundary conditions:
 
 Buoyancy is modeled using the Boussinesq approximation.
 
-## LBM Preliminaries
-## Governing Equation
+## Preliminaries
+### Governing Equation
 Lattice Boltzmann Equation with BGK-approximation:
 $\frac{\partial f}{\partial t} + \mathbf{c} \cdot \nabla f = \Omega(f) \Rightarrow f_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = f_i(\mathbf{x}, t) - \frac{1}{\tau_f} \left( f_i - f_i^{eq} \right)$ (for momentum)
 
@@ -35,7 +35,7 @@ $f_i^{eq} = w_i \rho \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} + \f
 
 $g_i^{eq} = w_i T \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} \right]$ (first-order equilibrium for temperature)
 
-## Macroscopic Quantities and Boundary Conditions
+### Macroscopic Quantities and Boundary Conditions
 Density:
 $\rho = \sum_i f_i$
 
@@ -54,6 +54,32 @@ $f_i - f_i^{eq} = f_{opp} - f_{opp}^{eq}$
 Constant Temperature wall (anti-bounce back BC):
 $g_i = -g_{opp} + 2 g_i^{eq}$
 
+### Non-Dimensional Parameters
+
+The flow is characterized by:
+
+$Re_{LB} = \frac{u_{lid} (n_y - 1)}{\nu}$
+
+$Pr_{LB} = \frac{\nu}{\alpha}$
+
+$Ra = \frac{g \beta \Delta T_{char} (ny - 1)^3}{\nu \alpha}$
+
+where;
+- $u_{lid}$ : lid velocity
+- $n_y$ : cavity length in lattice units
+- $\nu$ : kinematic viscosity in lattice units
+- $\alpha$ : thermal diffusivity in lattice units
+- $\beta$ : thermal expansion coefficient in lattice units
+- $\Delta T_{char} : characteristic temperature difference in lattice units ($\frac{q_{wall} (n_y -1)} {\kappa})
+
+### Buoyancy Model
+
+Buoyancy is incorporated through the Boussinesq approximation using a body-force term:
+
+$F = \rho \beta (T - T_{ref}) g$
+
+The forcing term is implemented using the Guo forcing scheme.
+
 ## Directory Structure
 - src/ - CUDA kernels, interfaces, and host code
 - figures/ - Post-processed velocity, temperature profiles and streamlines.
@@ -61,7 +87,6 @@ $g_i = -g_{opp} + 2 g_i^{eq}$
     - Post-processing script to obtain plane-wise and slice-wise velocity contours, streamlines, temperature contours, and pressure profiles.
     - Conversion script to convert .csv data files from the numerical solver to .vti format to be visualized in ParaView.
 
-## Kernel Structure
 ## Kernel Structure
 
 | Function | Description |
@@ -75,6 +100,8 @@ $g_i = -g_{opp} + 2 g_i^{eq}$
 | lbm_compute_T_residual_gpu | Compute temperature residual |
 | lbm_copy_device_to_host | Copy results back to CPU |
 | lbm_free_gpu | Release device memory |
+
+## Performance
 
 ## Build Requirements
 - Linux or WSL2
