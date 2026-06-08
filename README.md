@@ -83,6 +83,16 @@ $F = \rho \beta (T - T_{ref}) g$
 
 The forcing term is implemented using the Guo forcing scheme.
 
+## Simulation Parameters
+
+Key parameters can be modified in `src/main.cpp`:
+- Grid resolution
+- Reynolds number
+- Rayleigh number
+- Prandtl number
+- Lid velocity
+- Convergence tolerance
+
 ## Directory Structure
 - src/ - CUDA kernels, interfaces, and host code
 - figures/ - Post-processed velocity, temperature profiles and streamlines.
@@ -94,17 +104,31 @@ The forcing term is implemented using the Guo forcing scheme.
 
 | Function | Description |
 |-----------|------------|
-| lbm_init_gpu | Allocate device memory and initialize lattice constants |
-| lbm_copy_host_to_device | Copy initial PDFs to GPU |
-| lbm_run_step_gpu | Execute one timestep |
-| lbm_kernel_soa | Collision and streaming kernel |
-| apply_bc_kernel | Apply boundary conditions |
-| lbm_compute_u_residual_gpu | Compute velocity residual |
-| lbm_compute_T_residual_gpu | Compute temperature residual |
-| lbm_copy_device_to_host | Copy results back to CPU |
-| lbm_free_gpu | Release device memory |
+| `lbm_init_gpu` | Allocate device memory and initialize lattice constants |
+| `lbm_copy_host_to_device` | Copy initial PDFs to GPU |
+| `lbm_run_step_gpu` | Execute one timestep |
+| `lbm_kernel_soa` | Collision and streaming kernel |
+| `apply_bc_kernel` | Apply boundary conditions |
+| `lbm_compute_u_residual_gpu` | Compute velocity residual |
+| `lbm_compute_T_residual_gpu`| Compute temperature residual |
+| `lbm_copy_device_to_host` | Copy results back to CPU |
+| `lbm_free_gpu` | Release device memory |
 
 ## Performance
+Test System
+
+- GPU: RTX 3050 Laptop GPU
+- CPU: Intel Core Ultra 7
+- CUDA: 13.3
+
+Grid Size      Time/1000 Steps
+64³            XX s
+128³           XX s
+256³           XX s
+
+Memory layout: Structure of Arrays (SoA)
+Streaming: Pull
+Precision: Single
 
 ## Build Requirements
 - Linux or WSL2
@@ -117,23 +141,24 @@ The forcing term is implemented using the Guo forcing scheme.
 - Update all dependencies `sudo apt update`, `sudo apt upgrade`.
 - Clone the repository with `git clone https://github.com/Xandar95/lbm-cuda-ldc-2.0.git`.
 - Install CMake `sudo apt install cmake`.
-- Build using:
+- Build and run using:
     ```bash
     mkdir build
     cd build
     cmake .. 
     cmake --build .
+    ./lbm_sim
     ```
 - Edit `CMakeLists.txt` if using `g++` >= 12. Also change the GPU architecture (e.g `86` for Ampere) based on your GPU.
 - The numerical solver results will be written to a separate sim_output folder.
 
 ## Post-process Instructions
-- Install virtual environment package for Python 'python3 pip install venv'.
-- Create a virtual environment 'python3 -m venv venv'.
-- Activate virtual environment 'source ./venv/bin/activate'.
-- Install the dependencies 'pip install -r requirements.txt'.
-- Run the post processing script to get the plane-wise slice-wise contours 'python3 post_process.py'.
-- Run the conversion script to convert the .csv data files to .vti format 'python3 convert_vti.py'.
+- Install virtual environment package for Python `python3 pip install venv`.
+- Create a virtual environment `python3 -m venv venv`.
+- Activate virtual environment `source ./venv/bin/activate`.
+- Install the dependencies `pip install -r requirements.txt`.
+- Run the post processing script to get the plane-wise slice-wise contours `python3 post_process.py`.
+- Run the conversion script to convert the .csv data files to .vti format `python3 convert_vti.py`.
 
 ## Example Results
 
