@@ -104,7 +104,7 @@ __global__ void lbm_kernel_soa(const float* __restrict__ f_in,
         else {u = 0.0; v = 0.0; w = 0.0;}
 
         // Forcing term for buoyancy (only in y-direction)
-        float Fy = -beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference (Boussinesq approximation)
+        float Fy = -rho * beta * gravity * (T - T_ref); // buoyancy force based on local temperature difference (Boussinesq approximation)
 
         // shift the velocity components to accurately recover the NSE with the force term (u = 1 / rho * sum(f_i * c_i) + 0.5 * (F * dt) / rho)
         v += 0.5 * Fy / rho; // Fx = 0, Fz = 0, so only adjust v for buoyancy force

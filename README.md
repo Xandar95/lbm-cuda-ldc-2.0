@@ -28,7 +28,7 @@ Buoyancy is modeled using the Boussinesq approximation.
 
 Lattice Boltzmann Equation with BGK-approximation:
 
-$\frac{\partial f}{\partial t} + \mathbf{c} \cdot \nabla f = \Omega(f) \Rightarrow f_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = f_i(\mathbf{x}, t) - \frac{1}{\tau_f} \left( f_i - f_i^{eq} \right)$ (for momentum)
+$\frac{\partial f}{\partial t} + \mathbf{c} \cdot \nabla f = \Omega(f) + S(f) \Rightarrow f_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = f_i(\mathbf{x}, t) - \frac{1}{\tau_f} \left( f_i - f_i^{eq} \right) + S_i(\mathbf{x}, t)$ (for momentum)
 
 $\frac{\partial g}{\partial t} + \mathbf{c} \cdot \nabla g = \Omega(g) \Rightarrow g_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = g_i(\mathbf{x}, t) - \frac{1}{\tau_g} \left( g_i - g_i^{eq} \right)$ (for temperature)
 
@@ -73,15 +73,17 @@ where;
 - $\nu$ : kinematic viscosity in lattice units
 - $\alpha$ : thermal diffusivity in lattice units
 - $\beta$ : thermal expansion coefficient in lattice units
-- $\Delta T_{char} : characteristic temperature difference in lattice units ($\frac{q_{wall} (n_y -1)} {\kappa})
+- $\Delta T_{char}$ : characteristic temperature difference in lattice units ($\frac{q_{wall} (n_y -1)} {\kappa}$)
 
 ### Buoyancy Model
 
 Buoyancy is incorporated through the Boussinesq approximation using a body-force term:
 
-$F = \rho \beta (T - T_{ref}) g$
+$F = -\rho \beta (T - T_{ref}) g$
 
-The forcing term is implemented using the Guo forcing scheme.
+The forcing term is implemented using the Guo forcing scheme:
+
+$S_i = (1 - \frac{\Delta t}{2 \tau_f}) w_i \left(\frac{c_i - \mathbf{u}}{c_s^2} + \frac{(c_i \cdot \mathbf{u})c_i}{c_s^4}) \cdot F$
 
 ## Simulation Parameters
 
@@ -176,7 +178,7 @@ Test System
 ![Streamlines](figures/streamlines_XY_midplane.png)
 
 ## Current Limitations
-- Single precision only
+- Single precision only (can be set to double precision at the cost of higher VRAM usage)
 - BGK collision operator only
 - Uniform Cartesian mesh
 - Single GPU implementation
