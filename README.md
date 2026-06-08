@@ -117,11 +117,10 @@ Key parameters can be modified in `src/main.cpp`:
 | `lbm_free_gpu` | Release device memory |
 
 ## Performance
-Test System
-
-- GPU: RTX 3050 Laptop GPU
-- CPU: Intel Core Ultra 7
-- CUDA: 13.3
+-Test System:
+  - GPU: RTX 3050 Laptop GPU
+  - CPU: Intel Core Ultra 7
+  - CUDA: 13.3
 
 - Memory layout: Structure of Arrays (SoA)
 - Streaming: Pull
@@ -136,7 +135,7 @@ Test System
 ## Build Requirements
 - Linux or WSL2
 - CMake ≥ 3.18
-- CUDA Toolkit ≥ 12.0
+- CUDA Toolkit ≥ 12.0 or NVIDIA HPC_SDK
 - C++17 compatible compiler
 - NVIDIA GPU (Compute Capability ≥ 6.0)
 
