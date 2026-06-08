@@ -83,7 +83,7 @@ $F = -\rho \beta (T - T_{ref}) g$
 
 The forcing term is implemented using the Guo forcing scheme:
 
-$S_i = (1 - \frac{\Delta t}{2 \tau_f}) w_i \left(\frac{c_i - \mathbf{u}}{c_s^2} + \frac{(c_i \cdot \mathbf{u})c_i}{c_s^4}) \cdot F$
+$S_i = (1 - \frac{\Delta t}{2 \tau_f}) w_i \left(\frac{c_i - \mathbf{u}}{c_s^2} + \frac{(c_i \cdot \mathbf{u})c_i}{c_s^4} \right) \cdot F$
 
 ## Simulation Parameters
 
