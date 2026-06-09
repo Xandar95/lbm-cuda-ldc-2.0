@@ -101,7 +101,7 @@ lbm-cuda-ldc-2.0
 │   ├── convert_vti.py      # Convert CSV output to VTI for ParaView
 │   └── requirements.txt    # Python dependencies
 │
-├── figures/               # Example results and validation plots
+├── figures/               # Example results 
 │
 ├── CMakeLists.txt
 └── README.md
