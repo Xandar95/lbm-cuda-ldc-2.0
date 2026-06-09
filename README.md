@@ -89,11 +89,23 @@ $\alpha = c_s^2 (\tau_g - 0.5)$
 - Convergence tolerance (adjust as needed for convergence)
 
 ## Directory Structure
-- src/ - CUDA kernels, interfaces, and host code
-- figures/ - Post-processed velocity, temperature profiles and streamlines.
-- post-process/ 
-    - Post-processing script to obtain plane-wise and slice-wise velocity contours, streamlines, temperature contours, and pressure profiles.
-    - Conversion script to convert .csv data files from the numerical solver to .vti format to be visualized in ParaView.
+```text
+lbm-cuda-ldc-2.0
+├── src/
+│   ├── lbm_kernel.cu       # CUDA kernels
+│   ├── lbm_kernel.cuh      # CUDA kernel headers
+│   └── main.cpp            # Host code
+│
+├── post-process/
+│   ├── post_process.py     # Generate velocity, temperature and streamline plots
+│   ├── convert_vti.py      # Convert CSV output to VTI for ParaView
+│   └── requirements.txt    # Python dependencies
+│
+├── figures/               # Example results and validation plots
+│
+├── CMakeLists.txt
+└── README.md
+```
 
 ## Kernel Structure
 
