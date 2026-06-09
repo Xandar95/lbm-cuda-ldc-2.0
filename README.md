@@ -80,13 +80,13 @@ Key parameters can be modified in `src/main.cpp`:
 - Grid resolution (increase as per available VRAM)
           $\text{Approximate device memory usage (GB)} \approx \frac{n_x \times n_y \times n_z \times \text{no. of bytes per grid point}}{10^9}$
           $\text{No. of bytes per grid point} = 2 \times \text{No. of discrete lattice directions} \times \text{No. of PDFs} \times \text{size of floating point precision}$
-- Reynolds number (increase as per the numerical stability margins)
-          $\nu = \frac{c_s^2}{\tau_f - 0.5}$ 
+- Reynolds number (increase as per the numerical stability margins)  
+$\nu = c_s^2 (\tau_f - 0.5)$ 
 - Rayleigh number
-- Prandtl number (increase as per the numerical stability margins)
-          $\alpha = \frac{c_s^2}{\tau_g - 0.5}$
+- Prandtl number (increase as per the numerical stability margins)  
+$\alpha = c_s^2 (\tau_g - 0.5)$
 - Lid velocity (must be set such that $Ma = \frac{u_{lid}}{c_s} < 0.3$ to retain incompressibility)
-- Convergence tolerance
+- Convergence tolerance (adjust as needed for convergence)
 
 ## Directory Structure
 - src/ - CUDA kernels, interfaces, and host code
