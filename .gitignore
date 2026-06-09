@@ -8,10 +8,11 @@ venv
 lbm_sim
 build
 
-# exclude data files
+# exclude data files and post-processed animations
 *.csv
 *.vti
 sim_output/*.txt
+*.gif
 
 # exclude previous fortran source code
 *.f90

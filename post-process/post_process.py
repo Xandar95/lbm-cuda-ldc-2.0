@@ -126,27 +126,37 @@ class Plotter:
     # animate XY plane streamlines at a given z-slice
     def animate_streamlines(self, files, param, plane, slice):
         fig = plt.figure(figsize=(6, 5))
+        colorbars = []
 
         def draw_frame(frame):
             filename = files[frame]
             nx, ny, nz, x_3d, y_3d, z_3d, u_3d, v_3d, w_3d, T_3d, p_3d = load_simulation_data(filename)
 
+            # Remove colorbar axes from the previous frame before drawing new ones
+            for cbar in colorbars:
+                cbar.remove()
+            colorbars.clear()
+
             plt.clf()
             if plane == 'XY':
-                plt.streamplot(x_3d[:, 0, slice], y_3d[0, :, slice], u_3d[:, :, slice].T, v_3d[:, :, slice].T, color='k', density=1.5)
+                vel_mag = np.sqrt(u_3d[:, :, slice]**2 + v_3d[:, :, slice]**2)
+                plt.streamplot(x_3d[:, 0, slice], y_3d[0, :, slice], u_3d[:, :, slice].T, v_3d[:, :, slice].T, color=vel_mag.T, cmap='jet', density=1.5)
                 plt.xlabel('x')
                 plt.ylabel('y')
             elif plane == 'XZ':
-                plt.streamplot(x_3d[:, slice, 0], z_3d[0, slice, :], u_3d[:, slice, :].T, w_3d[:, slice, :].T, color='k', density=1.5)
+                vel_mag = np.sqrt(u_3d[:, slice, :]**2 + w_3d[:, slice, :]**2)
+                plt.streamplot(x_3d[:, slice, 0], z_3d[0, slice, :], u_3d[:, slice, :].T, w_3d[:, slice, :].T, color=vel_mag.T, cmap='jet', density=1.5)
                 plt.xlabel('x')
                 plt.ylabel('z')
             elif plane == 'YZ':
-                plt.streamplot(z_3d[slice, 0, :], y_3d[slice, :, 0], w_3d[slice, :, :].T, v_3d[slice, :, :].T, color='k', density=1.5)
+                vel_mag = np.sqrt(w_3d[slice, :, :]**2 + v_3d[slice, :, :]**2)
+                plt.streamplot(z_3d[slice, 0, :], y_3d[slice, :, 0], w_3d[slice, :, :].T, v_3d[slice, :, :].T, color=vel_mag.T, cmap='jet', density=1.5)
                 plt.xlabel('z')
                 plt.ylabel('y')
             else:
                 raise ValueError("Invalid plane. Choose from 'XY', 'XZ', 'YZ'.")
 
+            colorbars.append(plt.colorbar(label=f'{plane} plane Velocity Magnitude'))
             plt.title(f'Streamlines of {plane} plane at slice {slice} \n Re={param[0]}, Pr={param[1]}, Ra={param[2]} \n Frame: {frame+1}/{len(files)}')
             plt.tight_layout()
             return plt.gca()
@@ -246,9 +256,14 @@ def main():
 
     # create animations for velocity contours, streamlines, temperature contours, and pressure contours
     #anim_velocity = plotter.animate_velocity_contours(files, param, plane='XY', slice=nz//2)
-    #anim_streamlines = plotter.animate_streamlines(files, param, plane='XY', slice=nz//2)
-    anim_temperature = plotter.animate_temperature_contours(files, param, plane='XY', slice=nz//2)
+    anim_streamlines = plotter.animate_streamlines(files, param, plane='XY', slice=nz//2)
+    #anim_temperature = plotter.animate_temperature_contours(files, param, plane='XY', slice=nz//2)
     #anim_pressure = plotter.animate_pressure_contours(files, param, plane='XY', slice=nz//2)
+
+    #anim_velocity.save('velocity_contours.gif', writer='pillow', fps=10)
+    anim_streamlines.save('streamlines.gif', writer='pillow', fps=10)
+    #anim_temperature.save('temperature_contours.gif', writer='pillow', fps=10)
+    #anim_pressure.save('pressure_contours.gif', writer='pillow', fps=10)
     plt.show()
 
 if __name__ == "__main__":
