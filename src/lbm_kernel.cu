@@ -218,30 +218,33 @@ __global__ void apply_bc_kernel(float* __restrict__ f,
     // South wall (k=0)
     if (k == 0) {
         for (int l = 0; l < 27; l++) {
-            if (d_cz[l] == 1)
+            if (d_cz[l] == 1){
                 f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
                 g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC
+            }
         }
     }
 
     // North wall (k=nz-1)
     if (k == nz - 1) {
         for (int l = 0; l < 27; l++) {
-            if (d_cz[l] == -1)
+            if (d_cz[l] == -1){
                 f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
                 g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC 
+            }
         }
     }
 
     // Bottom wall (j=0)
     if (j == 0) {
         for (int l = 0; l < 27; l++) {
-            if (d_cy[l] == 1)
+            if (d_cy[l] == 1){
                 f[l * N + idx] = f[d_opp[l] * N + idx]; // No slip bounce-back for velocity
 
                 g[l * N + idx] = -g[d_opp[l] * N + idx] + 2.0 * d_weights[l] * T_wall; // anti-bounce back for temperature to impose Dirichlet BC 
+            }
         }
     }
 

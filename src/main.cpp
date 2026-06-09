@@ -11,7 +11,7 @@ Flow characterized by Reynolds, Prandtl, and Rayleigh numbers */
 
 int main() {
     // spatial and temporal resolution
-    int nx = 126; int ny = 126; int nz = 126; // grid size
+    int nx = 128; int ny = 128; int nz = 128; // grid size
     int nsteps = 1.0e6; // number of time steps
 
     // domain parameters
@@ -173,9 +173,16 @@ int main() {
                             w_local += f[pdf(l, idx(i, j, k))] * cz[l];
                         }
                         
-                        u_local /= rho_local;
-                        v_local /= rho_local;
-                        w_local /= rho_local;
+                        if (rho_local > 1.0e-9f) { // avoid division by zero
+                            u_local /= rho_local;
+                            v_local /= rho_local;
+                            w_local /= rho_local;
+                        }
+                        else {
+                            u_local = 0.0f;
+                            v_local = 0.0f;
+                            w_local = 0.0f;
+                        }
                         float p_local = cs * cs * rho_local; // pressure from equation of state
 
                         intermediate_file << x[idx(i, j, k)] << "," << y[idx(i, j, k)] << "," << z[idx(i, j, k)] << "," << u_local / u_lid << "," << v_local / u_lid << "," << w_local / u_lid << "," << T_local << "," << p_local << "\n"; // output coordinates, normalized velocity, temperature, and pressure

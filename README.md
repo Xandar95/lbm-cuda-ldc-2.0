@@ -165,7 +165,7 @@ Key parameters can be modified in `src/main.cpp`:
 
 ## Current Limitations
 - Single precision only (can be set to double precision at the cost of higher VRAM usage)
-- BGK collision operator only
+- BGK collision operator only (Max. achievable $Re$ number limited)
 - Uniform Cartesian mesh
 - Single GPU implementation
 
