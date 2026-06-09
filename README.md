@@ -8,20 +8,9 @@ The computational domain consists of a cubic cavity.
 
 Boundary conditions:
 
-- Top wall:
-  - Constant velocity $u_{lid}$
-  - Constant heat flux $q_{wall}$ for heat removal
+![Boundary_Conditions](figures/ldc.png)
 
-- Bottom wall:
-  - No-slip
-  - Constant temperature $T_{wall}$
-
-- Side walls:
-  - No-slip
-  - Constant heat flux $q_{wall}$ in West and East walls for heat addition
-  - Constant temperature $T_{wall}$ in North and South walls
-
-Buoyancy is modeled using the Boussinesq approximation.
+Buoyancy force $F_y$ is modeled using the Boussinesq approximation.
 
 ## Preliminaries
 ### Governing Equation
