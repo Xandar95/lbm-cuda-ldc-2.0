@@ -115,8 +115,8 @@ Key parameters can be modified in `src/main.cpp`:
 
 |Grid Size | Time/1000 Steps |
 |----------|-----------------|
-| 64³ | XX s |
-| 128³ | XX s |
+| 64³ | 9.19 s |
+| 128³ | 31.60 s |
 | 256³ | XX s |
 
 ## Build Requirements
