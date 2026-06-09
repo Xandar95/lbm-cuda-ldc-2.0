@@ -75,11 +75,13 @@ $S_i = (1 - \frac{\Delta t}{2 \tau_f}) w_i \left(\frac{c_i - \mathbf{u}}{c_s^2} 
 ## Simulation Parameters
 
 Key parameters can be modified in `src/main.cpp`:
-- Grid resolution
+- Grid resolution (increase as per available VRAM)
+          $Approximate device memory usage (GB) \approx \frac{n_x \times n_y \times n_z \times no. of bytes per grid point}{10^9}$
+          $No. of bytes per grid point = 2 \times No. of discrete lattice directions \times No. of PDFs \times size of floating point precision$
 - Reynolds number
 - Rayleigh number
 - Prandtl number
-- Lid velocity
+- Lid velocity (must be set such that $Ma = \frac{u_{lid}}{c_s} < 0.3$ to retain incompressibility)
 - Convergence tolerance
 
 ## Directory Structure
@@ -105,7 +107,7 @@ Key parameters can be modified in `src/main.cpp`:
 
 ## Performance
 - Test System:
-  - GPU: RTX 3050 Laptop GPU
+  - GPU: RTX 3050 Laptop GPU 6GB VRAM
   - CPU: Intel Core Ultra 7
   - CUDA: 13.3
 
@@ -115,9 +117,9 @@ Key parameters can be modified in `src/main.cpp`:
 
 |Grid Size | Time/1000 Steps |
 |----------|-----------------|
-| 64³ | 9.19 s |
-| 128³ | 31.60 s |
-| 256³ | XX s |
+| 64³ | 0 m 9 s |
+| 128³ | 0 m 32 s |
+| 192³ | 2 m 48 s |
 
 ## Build Requirements
 - Linux or WSL2
