@@ -21,6 +21,8 @@ $\frac{\partial f}{\partial t} + \mathbf{c} \cdot \nabla f = \Omega(f) + S(f) \R
 
 $\frac{\partial g}{\partial t} + \mathbf{c} \cdot \nabla g = \Omega(g) \Rightarrow g_i(\mathbf{x} + \mathbf{c}_i \Delta t, t + \Delta t) = g_i(\mathbf{x}, t) - \frac{1}{\tau_g} \left( g_i - g_i^{eq} \right)$ (for temperature)
 
+($\Delta \mathbf{x} = 1$ and $\Delta t = 1$ spatial and temporal discretization set to unity)
+
 Equilibrium Distribution Function:
 
 $f_i^{eq} = w_i \rho \left[ 1 + \frac{\mathbf{c}_i \cdot \mathbf{u}}{c_s^2} + \frac{(\mathbf{c}_i \cdot \mathbf{u})^2}{2c_s^4} - \frac{\mathbf{u}^2}{2c_s^2} \right]$ (second-order equilibrium for momentum)
@@ -76,11 +78,13 @@ $S_i = (1 - \frac{\Delta t}{2 \tau_f}) w_i \left(\frac{c_i - \mathbf{u}}{c_s^2} 
 
 Key parameters can be modified in `src/main.cpp`:
 - Grid resolution (increase as per available VRAM)
-          $Approximate device memory usage (GB) \approx \frac{n_x \times n_y \times n_z \times no. of bytes per grid point}{10^9}$
-          $No. of bytes per grid point = 2 \times No. of discrete lattice directions \times No. of PDFs \times size of floating point precision$
-- Reynolds number
+          $\text{Approximate device memory usage (GB)} \approx \frac{n_x \times n_y \times n_z \times \text{no. of bytes per grid point}}{10^9}$
+          $\text{No. of bytes per grid point} = 2 \times \text{No. of discrete lattice directions} \times \text{No. of PDFs} \times \text{size of floating point precision}$
+- Reynolds number (increase as per the numerical stability margins)
+          $\nu = \frac{c_s^2}{\tau_f - 0.5}$ 
 - Rayleigh number
-- Prandtl number
+- Prandtl number (increase as per the numerical stability margins)
+          $\alpha = \frac{c_s^2}{\tau_g - 0.5}$
 - Lid velocity (must be set such that $Ma = \frac{u_{lid}}{c_s} < 0.3$ to retain incompressibility)
 - Convergence tolerance
 
