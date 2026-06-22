@@ -260,11 +260,11 @@ def main():
     #anim_temperature = plotter.animate_temperature_contours(files, param, plane='XY', slice=nz//2)
     #anim_pressure = plotter.animate_pressure_contours(files, param, plane='XY', slice=nz//2)
 
+    # save animations
     #anim_velocity.save('velocity_contours.gif', writer='pillow', fps=10)
     anim_streamlines.save('streamlines.gif', writer='pillow', fps=10)
     #anim_temperature.save('temperature_contours.gif', writer='pillow', fps=10)
     #anim_pressure.save('pressure_contours.gif', writer='pillow', fps=10)
-    plt.show()
 
 if __name__ == "__main__":
     main()
